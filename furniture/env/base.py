@@ -3,7 +3,7 @@
 # OpenAI gym interface
 import gym
 
-from ..util.subproc_vec_env import SubprocVecEnv
+from furniture.util.subproc_vec_env import SubprocVecEnv
 
 REGISTERED_ENVS = {}
 

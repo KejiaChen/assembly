@@ -22,9 +22,9 @@ from collections import OrderedDict
 
 import numpy as np
 
-from env.furniture_baxter import FurnitureBaxterEnv
-from env.models import furniture_names, background_names, agent_names, furniture_name2id
-import env.transform_utils as T
+from furniture.env.furniture_baxter import FurnitureBaxterEnv
+from furniture.env.models import furniture_names, background_names, agent_names, furniture_name2id
+import furniture.env.transform_utils as T
 
 
 class FurnitureExampleEnv(FurnitureBaxterEnv):
@@ -46,7 +46,9 @@ class FurnitureExampleEnv(FurnitureBaxterEnv):
         # set subtask_ob for getting target object
         config.subtask_ob = True
         # set environment- and task-specific configurations
-        config.max_episode_steps = 50
+        config.max_episode_steps = 100
+        # set reward value
+        config.distance_reward = 10
 
         # create a MuJoCo environment based on @config
         super().__init__(config)
@@ -121,7 +123,8 @@ class FurnitureExampleEnv(FurnitureBaxterEnv):
         ctrl_penalty = self._ctrl_penalty(a)
 
         # distance-based reward
-        hand_pos = np.array(self.sim.data.site_xpos[self.right_eef_site_id])
+        # hand_pos = np.array(self.sim.data.site_xpos[self.right_eef_site_id])
+        hand_pos = np.array(self.sim.data.site_xpos[self.eef_site_id['right']])
         dist = T.l2_dist(hand_pos, self._get_pos(self._target_body))
         distance_reward = -self._config.distance_reward * dist
 
@@ -149,7 +152,7 @@ def main(args):
     print("IKEA Furniture Assembly Environment!")
 
     # make environment following arguments
-    from env import make_env
+    from furniture.env import make_env
 
     env = make_env("FurnitureExampleEnv", args)
 
@@ -203,8 +206,8 @@ def argsparser():
     Returns argument parser for furniture assembly environment.
     """
     import argparse
-    import config.furniture as furniture_config
-    from util import str2bool
+    import furniture.config.furniture as furniture_config
+    from furniture.util import str2bool
 
     parser = argparse.ArgumentParser("Demo for IKEA Furniture Assembly Environment")
     parser.add_argument("--seed", type=int, default=123)

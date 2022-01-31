@@ -3,11 +3,11 @@ import numpy as np
 from tqdm import tqdm
 import gym.spaces
 
-from . import transform_utils as T
+import furniture.env.transform_utils as T
 from .furniture_sawyer import FurnitureSawyerEnv
 from .furniture_sawyer_dense import FurnitureSawyerDenseRewardEnv
 from .models import background_names, furniture_name2id, furniture_xmls
-from ..util.logger import logger
+from furniture.util.logger import logger
 
 
 class FurnitureSawyerGenEnv(FurnitureSawyerDenseRewardEnv):

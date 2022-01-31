@@ -6,7 +6,7 @@ from pyquaternion import Quaternion
 from ..base import MujocoXML
 from ...mjcf_utils import string_to_array, array_to_string
 from ...xml_adjusting.rescale import *
-from ....util import Qpos
+from furniture.util import Qpos
 
 
 class MujocoObject:

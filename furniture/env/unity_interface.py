@@ -14,7 +14,7 @@ import numpy as np
 import gdown
 
 from .mjremote import mjremote
-from ..util.logger import logger
+from furniture.util.logger import logger
 
 
 APP_GDRIVE_ID = {

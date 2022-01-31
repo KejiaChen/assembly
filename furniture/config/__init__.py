@@ -1,7 +1,7 @@
 import argparse
 
 from .furniture import add_argument as add_furniture_arguments
-from ..util import str2bool
+from furniture.util import str2bool
 
 
 def create_parser(env=None):
@@ -18,7 +18,7 @@ def create_parser(env=None):
     parser.add_argument(
         "--env",
         type=str,
-        default=env if env is not None else "furniture-baxter-flip-v0",
+        default=env if env is not None else "IKEASawyerDense-v0",
         help="Environment name",
     )
 

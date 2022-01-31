@@ -5,9 +5,9 @@ from collections import OrderedDict
 import gym.spaces
 import numpy as np
 
-from . import transform_utils as T
+import furniture.env.transform_utils as T
 from .furniture import FurnitureEnv
-from ..util.logger import logger
+from furniture.util.logger import logger
 
 
 class FurnitureSawyerEnv(FurnitureEnv):

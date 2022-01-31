@@ -2,10 +2,10 @@
 import numpy as np
 import pickle
 
-from . import transform_utils as T
+import furniture.env.transform_utils as T
 from .furniture_baxter import FurnitureBaxterEnv
 from .models import furniture_name2id
-from ..util.logger import logger
+from furniture.util.logger import logger
 
 
 class FurnitureBaxterToyTableEnv(FurnitureBaxterEnv):

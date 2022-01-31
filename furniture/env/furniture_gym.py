@@ -3,9 +3,9 @@
 import gym
 import numpy as np
 
-from . import make_env
-from ..config.furniture import get_default_config
-from ..config import create_parser
+from .base import make_env
+from furniture.config.furniture import get_default_config
+from furniture.config import create_parser
 
 
 class FurnitureGym(gym.Env):

@@ -42,7 +42,8 @@ furniture-unity/.vs
 furniture-unity/Assembly-CSharp-Editor.csproj
 furniture-unity/*.csproj
 /binary
-
+/Furniture_Data
+/Furniture.x86_64
 
 # Python
 ## Byte-compiled / optimized / DLL files
@@ -81,3 +82,7 @@ wandb/
 
 ## VSCode
 .vscode
+
+## pycharm
+.idea
+

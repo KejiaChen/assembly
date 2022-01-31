@@ -1,4 +1,4 @@
-from ..util import str2bool
+from furniture.util import str2bool
 
 
 def add_argument(parser):

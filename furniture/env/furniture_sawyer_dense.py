@@ -3,10 +3,10 @@ from typing import Tuple
 import numpy as np
 import gym.spaces
 
-from . import transform_utils as T
+import furniture.env.transform_utils as T
 from .furniture_sawyer import FurnitureSawyerEnv
 from .models import furniture_name2id
-from ..util.logger import logger
+from furniture.util.logger import logger
 
 
 class FurnitureSawyerDenseRewardEnv(FurnitureSawyerEnv):

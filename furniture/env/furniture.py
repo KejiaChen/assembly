@@ -15,7 +15,7 @@ import hjson
 import yaml
 import mujoco_py
 
-from . import transform_utils as T
+import furniture.env.transform_utils as T
 from .base import EnvMeta
 from .image_utils import color_segmentation
 from .mjcf_utils import xml_path_completion
@@ -29,10 +29,10 @@ from .models.grippers import gripper_factory
 from .models.objects import MujocoXMLObject
 from .unity_interface import UnityInterface
 from .controllers.arm_controller import *
-from ..util.demo_recorder import DemoRecorder
-from ..util.video_recorder import VideoRecorder
-from ..util.logger import logger
-from ..util import Qpos, PrettySafeLoader
+from furniture.util.demo_recorder import DemoRecorder
+from furniture.util.video_recorder import VideoRecorder
+from furniture.util.logger import logger
+from furniture.util import Qpos, PrettySafeLoader
 
 
 np.set_printoptions(suppress=True)

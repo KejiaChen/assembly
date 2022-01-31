@@ -1,7 +1,7 @@
 import argparse
 
-from ..util import str2bool, str2intlist, str2set
-from ..env.models import furniture_names, furniture_ids, background_names
+from furniture.util import str2bool, str2intlist, str2set
+from furniture.env.models import furniture_names, furniture_ids, background_names
 
 
 def size_range(x):
@@ -291,6 +291,7 @@ def add_argument(parser):
     parser.add_argument("--ctrl_penalty_coef", type=float, default=1e-3)
     parser.add_argument("--unstable_penalty_coef", type=float, default=100)
     parser.add_argument("--success_reward", type=float, default=100)
+    parser.add_argument("--distance_reward", type=float, default=10) # to be changed
     parser.add_argument("--touch_reward", type=float, default=10)
     parser.add_argument("--pick_reward", type=float, default=100)
 
