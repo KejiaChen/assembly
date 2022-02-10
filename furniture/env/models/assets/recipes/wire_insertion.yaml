@@ -1,0 +1,43 @@
+# xyz parameters
+fine_magnitude: 3
+z_finedist: 0.05
+z_conn_dist: 0.0
+lat_magnitude: 15
+eps: 0.007
+eps_fine: 0.0025
+# rot parameters
+rot_magnitude: 0.4
+rot_eps: 0.05 # 0.05
+rot_eps_fine: 0.02
+min_rot_act: 0.05 # 0.1
+min_rot_act_fine: 0.02
+# general parameters
+use_closest: False
+num_connects: 1
+max_success_steps: 800
+# assembly order parameters
+recipe:
+  - !!python/tuple ["wire1", "table1"]
+
+
+grip_init_pos:
+  -
+
+
+waypoints:
+  -
+    - [0, 0, 0.1]
+
+
+nogrip_safepos:
+  -
+
+
+grip_angles:
+  -
+    - [0, 0, -1]
+
+
+# TODO: what does "90""270" mean?
+site_recipe:
+  - !!python/tuple ["wire-hole,0,90,180,270,conn_site1", "table-wire,0,90,180,270,conn_site1", 90]

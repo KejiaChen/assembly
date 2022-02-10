@@ -1,0 +1,237 @@
+<mujoco model="wire_insertion">
+    <custom>
+<!--        <numeric data="0.0   0.21 0.01497 0.5 -0.5 -0.5 0.5" name="0_part0_initpos" />-->
+<!--        <numeric data="-0.37 0.31 0.01497 0.499854 0.499854 -0.500146 -0.500146" name="1_part1_initpos" />-->
+<!--        <numeric data="-0.37 0.21 0.01497 0.500129 0.500129 0.499871 0.499871" name="2_part2_initpos" />-->
+<!--        <numeric data="0.0   0.31 0.01497 0.5 -0.5 0.5 -0.5" name="3_part3_initpos" />-->
+        <numeric data="0.1 0.27 0.051527 1 0 0 0" name="wire1_initpos" />
+<!--        <numeric data="0.01 0.07 0.051527 1 0 0 0" name="insertion_hole_1_initpos" />-->
+        <!-- horizontal-->
+        <numeric data="-0.1 0.2 0.029527 1 0 0 0" name="table1_initpos" />
+<!--        0.1 -0.032 -0.06998405-->
+        <!-- vertical-->
+<!--        <numeric data="-0.1 0.0 0.052527 0.7073883 -0.7068252 0 0" name="table1_initpos" />&ndash;&gt;-->
+    </custom>
+    <asset>
+        <material name="table_mat" specular="0" shininess="0.5" reflectance="0" rgba="0.93 0.93 0.93 1"/>
+        <!-- ceramic table texture and material-->
+        <texture file="../textures/ceramic.png" type="cube" name="tex-ceramic"/>
+        <material name="table_ceramic" reflectance="0.0" shininess="0.0" specular="0.2" texrepeat="1 1" texture="tex-ceramic" />
+        <texture file="../textures/steel-scratched.png" type="cube" name="steel-metal"/>
+        <material name="smetal" reflectance="1.0" shininess="1.0" specular="1.0" texrepeat="1 1" texture="steel-metal" texuniform="true"/>
+        <texture file="../textures/brass-ambra.png" type="cube" name="brass-metal"/>
+        <material name="bmetal"  reflectance="1.0" shininess="1.0" specular="1.0" texrepeat="1 1" texture="brass-metal" texuniform="true"/>
+        <mesh file="table_lack_0825/table.stl" name="part4" scale="0.015 0.015 0.02" />
+        <texture file="../textures/light-wood.png" name="tex-light-wood" type="2d" />
+        <material name="pencil-wood" reflectance="0.5" texrepeat="20 20" texture="tex-light-wood" texuniform="true" />
+    </asset>
+
+    <equality>
+<!--        <weld active="false" body1="wire1" body2="insertion_hole_1" solimp="1 1 0.5" solref="0.01 0.3" />-->
+        <weld active="false" body1="wire1" body2="table1" solimp="1 1 0.5" solref="0.01 0.3" />
+    </equality>
+
+    <compiler meshdir=""/>
+    <size njmax="8000" nconmax="4000"/>
+
+    <worldbody>
+        <!--Wire-->
+<!--        <body name="wire1" pos="0.2 -0.07 0.034" quat="0.7073883 0 -0.7068252 0">-->
+        <body name="wire1" pos="0.1 -0.04005574 -0.06998405" quat="0.7073883 0 0 -0.7068252">
+<!--        <body name="wire1" pos="0 0.07 0.032" quat="1 0 0 0">&ndash;&gt;-->
+<!--            <include file="./rope_expanded_short.xml"/>-->
+<!--            <body xmlns:xi="http://www.w3.org/2001/XInclude">-->
+<!--            <xi:include href="source.xml" parse="xml" />-->
+<!--            </body>-->
+            <geom name="wire1_I1_geom" conaffinity="0" contype="0" density="0" pos="0 0 0" size="0.005 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" solref="0.001 1" type="capsule" />-->
+            <geom name="noviz_collision_wire1_I1" density="5" size="0.005 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+            <geom name="wire1_G0_geom" conaffinity="0" contype="0" density="0"  pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />-->
+            <geom name="noviz_collision_wire1_G0" density="5" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+<!--            <geom name="G0" pos="0.045 0 0" size="0.005 0.03" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0" />-->
+
+<!--                <body name="B0" pos="0.0 0.0 0.0">-->
+<!--&lt;!&ndash;                <geom name="I1 visual" conaffinity="0" contype="0" density="0"  pos="0 0 0" size="0.0025 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" solref="0.001 1" type="capsule" />&ndash;&gt;-->
+<!--                    <geom name="I1_collision" size="0.0025 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.7 0.7 1" group="0" solref="0.001 1"/>-->
+<!--&lt;!&ndash;                <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;-->
+<!--                    <geom name="G0" pos="0.03 0 0" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0" />-->
+<!--                    <site name="B0_horizontal_radius_site" pos="0.03 0 0" rgba="1 1 0 1" size="0.0055" />-->
+<!--                    <body name="B1" pos="0.06 0 0">-->
+<!--&lt;!&ndash;                <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;-->
+<!--                        <joint name="J0_1" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />-->
+<!--                        <joint name="J1_1" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />-->
+<!--                        <geom name="G1" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>-->
+<!--                        <site name="B1_horizontal_radius_site" pos="0 0 0" rgba="1 1 0 1" size="0.0055" />-->
+<!--                        <body name="B2" pos="0.035 0 0">-->
+<!--&lt;!&ndash;                        <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;-->
+<!--                            <joint name="J0_2" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />-->
+<!--                            <joint name="J1_2" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />-->
+<!--                            <geom name="G2" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>-->
+<!--                            <site name="B2_horizontal_radius_site" pos="0 0 0" rgba="1 1 0 1" size="0.0055" />-->
+<!--&lt;!&ndash;                            <body name="B3" pos="0.035 0 0">&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                        <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                                <joint name="J0_3" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                <joint name="J1_3" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                <geom name="G3" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <body name="B4" pos="0.035 0 0">&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <joint name="J0_4" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <joint name="J1_4" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <geom name="G4" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <body name="B5" pos="0.035 0 0">&ndash;&gt;-->
+<!--&lt;!&ndash;                                        <joint name="J0_5" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                        <joint name="J1_5" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                        <geom name="G5" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                        <body name="B6" pos="0.035 0 0">&ndash;&gt;-->
+<!--&lt;!&ndash;                                            <joint name="J0_6" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                            <joint name="J1_6" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                            <geom name="G6" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                            <body name="B7" pos="0.035 0 0">&ndash;&gt;-->
+<!--&lt;!&ndash;                                                <joint name="J0_7" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                                <joint name="J1_7" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                                <geom name="G7" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                <body name="B8" pos="0.035 0 0">&ndash;&gt;-->
+<!--&lt;!&ndash;                                                    <joint name="J0_8" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                                    <joint name="J1_8" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                                    <geom name="G8" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                    <body name="B9" pos="0.035 0 0">&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                                                    <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                                                        <joint name="J0_9" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                                        <joint name="J1_9" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                                        <geom name="G9" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                        <body name="B10" pos="0.035 0 0">&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                                                    <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                                                            <joint name="J0_10" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                                            <joint name="J1_10" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                                            <geom name="G10" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                            <body name="B11" pos="0.035 0 0">&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                                                        <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                                                                <joint name="J0_11" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                                                <joint name="J1_11" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                                                <geom name="G11" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                                <geom pos="0.03 0 0" name="I2" size="0.0025 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.7 0.7 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                            </body>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                        </body>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                    </body>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                </body>&ndash;&gt;-->
+<!--&lt;!&ndash;                                            </body>&ndash;&gt;-->
+<!--&lt;!&ndash;                                        </body>&ndash;&gt;-->
+<!--&lt;!&ndash;                                    </body>&ndash;&gt;-->
+<!--&lt;!&ndash;                                </body>&ndash;&gt;-->
+<!--&lt;!&ndash;                            </body>&ndash;&gt;-->
+<!--                        </body>-->
+<!--                    </body>-->
+<!--            </body>-->
+            <!--site for gripper-->
+            <site group="1" name="wire1_ltgt_site0" pos="0.065 0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
+            <site group="1" name="wire1_rtgt_site0" pos="0.065 -0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
+            <!--site for hole-->
+            <site group="0" name="wire-hole,0,90,180,270,conn_site1" pos="-0.0125 0.0 0.0" quat="0.707107 0 0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />
+<!--            <site name="wire1_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="1 1 0 1" size="0.0035" />-->
+            <site name="wire1_horizontal_radius_site" pos="0.065 0 0" rgba="0 0 0 0" size="0.0055" />
+        </body>
+
+        <!-- Table -->
+<!--        <body name="table1" pos="0.0 0.0 0.0" quat="1 0 0 0"> -->
+        <body name="table1" pos="0.0 0.0 0.0" quat="0.7073883 0.7068252 0 0">
+            <geom conaffinity="0" contype="0" density="0" material="pencil-wood" mesh="part4" name="table1_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+            <geom density="50" name="noviz_collision_table1_0" pos="0 0 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.32 0.12 0.02" solref="0.001 1" type="box" />
+            <site name="table1_corner_site1" pos="-0.385 -0.140 -0.023" rgba="0 0 0 0" size="0.005" />
+            <site name="table1_corner_site2" pos="-0.385 0.140 -0.023" rgba="0 0 0 0" size="0.005" />
+            <site name="table1_corner_site3" pos="0.385 -0.140 -0.023" rgba="0 0 0 0" size="0.005" />
+            <site name="table1_corner_site4" pos="0.385 0.140 -0.023" rgba="0 0 0 0" size="0.005" />
+            <site name="table1_corner_site5" pos="-0.385 -0.140 0.0233" rgba="0 0 0 0" size="0.005" />
+            <site name="table1_corner_site6" pos="-0.385 0.140 0.0233" rgba="0 0 0 0" size="0.005" />
+            <site name="table1_corner_site7" pos="0.385 -0.140 0.0233" rgba="0 0 0 0" size="0.005" />
+            <site name="table1_corner_site8" pos="0.385 0.140 0.0233" rgba="0 0 0 0" size="0.005" />
+            <site name="table1_bottom_site" pos="0.0 0.0 -0.0" rgba="0 0 0 0" size="0.0066" />
+            <site name="table1_top_site" pos="0.0 0.0 0.02" rgba="0 0 0 0" size="0.0066" />
+            <!--horizontal-->
+<!--            <site group="0" name="table-wire,0,90,180,270,conn_site1" pos="0.2 -0.07 0.02" quat="0.707107 0 0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.0025" />-->
+            <!--vertical-->
+            <site group="0" name="table-wire,0,90,180,270,conn_site1" pos="0.1 -0.07 0.02" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />
+            <site name="table1_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="0 0 0 0" size="0.18" />
+        </body>
+
+        <!--Hole-->
+<!--        <body name="insertion_hole_1" pos="0.2 0.07 0.032" quat="0.7073883 0 0.7068252 0">-->
+<!--        <body name="insertion_hole_1" pos="0.1 -0.032 -0.06998405" quat="0.7073883 0 0 0.7068252">-->
+<!--            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0032  0.00875" name="hole1_1_geom" pos="0 -0.00665  0" solref="0.001 1" type="box" />-->
+<!--            <geom density="100" name="noviz_collision_hole1_1" pos="0 -0.00665  0" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.0032  0.00875" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />-->
+<!--            <geom  pos="0 -0.00665  0" size="0.01 0.0032  0.00875 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.2" group="0" condim="4" material="smetal" />-->
+<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0031" name="hole1_2_geom" pos="0.0 0 -0.00665" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_2" pos="0.0 0 -0.00665" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.00625 0.0031" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--            <geom pos="0.0 0 -0.00665" size="0.01 0.00625 0.0031 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0031" name="hole1_3_geom" pos="0.0 0 -0.00665" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_3" pos="0.0 0 -0.00665" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.00625 0.0031" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--            <geom pos="0.0 0 0.00665" size="0.01 0.00625 0.0031 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0032 0.00875" name="hole1_4_geom" pos="0 0.00665 0" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_4" pos="0 0.00665 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.0032 0.00875" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--            <geom pos="0 0.00665 0" size="0.01 0.0032 0.00875 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.0021 0.00875 0.00875" name="hole1_5_geom" pos="0.01 0 0" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_5" pos="0.01 0 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.0021 0.00875 0.00875" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--            <geom pos="0.01 0 0" size="0.0021 0.00875 0.00875 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--            <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.008 0 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />-->
+<!--            <site name="insertion_hole_3_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="0 0 0 0" size="0.012" />-->
+<!--&lt;!&ndash;              <site rgba="1 0 0 1" size="0.001" pos="0.0108 0 0" name="handle_site"/>&ndash;&gt;-->
+<!--&lt;!&ndash;              <site rgba="1 0 0 1" size="0.0006" pos="0 0 0" name="center_site"/>&ndash;&gt;-->
+<!--        </body>-->
+
+<!--        <body name="insertion_hole_1" pos="0.1 -0.032 -0.06998405" quat="0.7073883 0 0 0.7068252">-->
+<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0032  0.00875" name="hole1_1_geom" pos="0 -0.00665  0" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_1" pos="0 -0.00665  0" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.0032  0.00875" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--            <geom  pos="0 -0.00665  0" size="0.01 0.0016  0.00825 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.2" group="0" condim="4" material="smetal" />-->
+<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0031" name="hole1_2_geom" pos="0.0 0 -0.00665" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_2" pos="0.0 0 -0.00665" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.00625 0.0031" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--            <geom pos="0.0 0 -0.00665" size="0.01 0.00625 0.0016 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0031" name="hole1_3_geom" pos="0.0 0 -0.00665" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_3" pos="0.0 0 -0.00665" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.00625 0.0031" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--            <geom pos="0.0 0 0.00665" size="0.01 0.00625 0.0016 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0032 0.00875" name="hole1_4_geom" pos="0 0.00665 0" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_4" pos="0 0.00665 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.0032 0.00875" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--            <geom pos="0 0.00665 0" size="0.01 0.0016 0.00825 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.0021 0.00875 0.00875" name="hole1_5_geom" pos="0.01 0 0" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_5" pos="0.01 0 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.0021 0.00875 0.00875" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
+<!--            <geom pos="0.01 0 0" size="0.0021 0.00825 0.00825 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--            <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.008 0 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />-->
+<!--            <site name="insertion_hole_1_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="0 0 0 0" size="0.012" />-->
+<!--&lt;!&ndash;              <site rgba="1 0 0 1" size="0.001" pos="0.0108 0 0" name="handle_site"/>&ndash;&gt;-->
+<!--&lt;!&ndash;              <site rgba="1 0 0 1" size="0.0006" pos="0 0 0" name="center_site"/>&ndash;&gt;-->
+<!--        </body>-->
+
+<!--        <body pos="0.0 0.0 0.0" name="working_station">-->
+<!--&lt;!&ndash;		    <body pos="0.0 0.0 0.0" name="table0">&ndash;&gt;-->
+<!--&lt;!&ndash;			    <geom size="0.5 0.3 0.1" type="box" mass="2000" group="0" name="table_collision" material="table_mat"/>&ndash;&gt;-->
+<!--&lt;!&ndash;			    <geom size="0.5 0.3 0.1" type="box" mass="1e-8" group="1" name="table_visual" material="table_mat"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_corner_site1" pos="-0.51 -0.31 -0.06" rgba="1 1 0 1" size="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_corner_site2" pos="-0.51 0.31 -0.06" rgba="0 0 0 0" size="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_corner_site3" pos="0.385 -0.140 -0.023" rgba="0 0 0 0" size="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_corner_site4" pos="0.385 0.140 -0.023" rgba="0 0 0 0" size="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_corner_site5" pos="-0.385 -0.140 0.0233" rgba="0 0 0 0" size="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_corner_site6" pos="-0.385 0.140 0.0233" rgba="0 0 0 0" size="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_corner_site7" pos="0.385 -0.140 0.0233" rgba="0 0 0 0" size="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_corner_site8" pos="0.385 0.140 0.0233" rgba="0 0 0 0" size="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_bottom_site" pos="0.0 0.0 -0.0" rgba="0 0 0 0" size="0.0066" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_top_site" pos="0.0 0.0 0.02" rgba="0 0 0 0" size="0.0066" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <site name="table0_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="1 1 0 1" size="0.18" />&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                <geom pos="0.5 0.3 0.2" size="0.25 0.15 0.005" type="box" group="0" name="panel_collision" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                <geom pos="0.5 0.3 0.2" size="0.25 0.15 0.005" type="box" conaffinity="0" contype="0" group="1" name="panel_visual" material="table_mat_gray"/>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;		    </body>&ndash;&gt;-->
+<!--            -->
+<!--            <body name="insertion_hole_3" pos="-0.2 0.07 0.032" quat="0.7073883 0 0.7068252 0">-->
+<!--                <geom pos="0 -0.00665  0" size="0.01 0.0032  0.00875 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.2" group="0" condim="4" material="smetal" />-->
+<!--                <geom pos="0.0 0 -0.00665" size="0.01 0.00625 0.0031 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--                <geom pos="0.0 0 0.00665" size="0.01 0.00625 0.0031 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--                <geom pos="0 0.00665 0" size="0.01 0.0032 0.00875 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--                <geom pos="0.01 0 0" size="0.0021 0.00875 0.00875 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--                <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.008 0 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.0035" />-->
+<!--                <site name="insertion_hole_3_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="0 0 0 0" size="0.012" />-->
+<!--&lt;!&ndash;                    <site rgba="1 0 0 1" size="0.001" pos="0.0108 0 0" name="handle_site"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <site rgba="1 0 0 1" size="0.0006" pos="0 0 0" name="center_site"/>&ndash;&gt;-->
+<!--            </body>-->
+<!--        </body>-->
+
+    </worldbody>
+
+<!--    <include file='assets/actuator0.xml'/>-->
+<!--    <include file='assets/actuator1.xml'/>-->
+
+</mujoco>
