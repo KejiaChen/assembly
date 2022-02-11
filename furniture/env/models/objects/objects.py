@@ -179,14 +179,15 @@ class MujocoXMLObject(MujocoXML, MujocoObject):
         if name is None:
             name = self.name
         horizontal_radius_site = self.worldbody.find(
-            "./body/site[@name='%s_horizontal_radius_site']" % name
+            ".//body/site[@name='%s_horizontal_radius_site']" % name
         )
         return float(horizontal_radius_site.get("size"))
 
     def get_collision(self, name=None, site=False, friction=(1, 10, 0.5)):
         # get the mujocoXMLobject for geom labeled 'noviz'
         self.name = name
-        collision = copy.deepcopy(self.worldbody.find("./body[@name='%s']" % name))
+        # attention: // means to selects all elements at ALL levels beneath the current element
+        collision = copy.deepcopy(self.worldbody.find(".//body[@name='%s']" % name))
         collision.attrib.pop("name")
         if name is not None:
             collision.attrib["name"] = name

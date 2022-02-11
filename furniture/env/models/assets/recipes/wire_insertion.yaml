@@ -1,10 +1,10 @@
 # xyz parameters
 fine_magnitude: 3
 z_finedist: 0.05
-z_conn_dist: 0.0
+z_conn_dist: 0.001
 lat_magnitude: 15
 eps: 0.007
-eps_fine: 0.0025
+eps_fine: 0.003
 # rot parameters
 rot_magnitude: 0.4
 rot_eps: 0.05 # 0.05
@@ -31,6 +31,7 @@ waypoints:
 
 nogrip_safepos:
   -
+    - [-0.1, 0.2, 0.1]
 
 
 grip_angles:
@@ -40,4 +41,5 @@ grip_angles:
 
 # TODO: what does "90""270" mean?
 site_recipe:
-  - !!python/tuple ["wire-hole,0,90,180,270,conn_site1", "table-wire,0,90,180,270,conn_site1", 90]
+#  - !!python/tuple ["wire-hole,0,90,180,270,conn_site1", "table-wire,0,90,180,270,conn_site1", 90]
+  - !!python/tuple ["wire-hole,0,90,180,270,conn_site1", "hole-wire,0,90,180,270,conn_site1", 90]

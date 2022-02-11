@@ -5,10 +5,10 @@
 <!--        <numeric data="-0.37 0.21 0.01497 0.500129 0.500129 0.499871 0.499871" name="2_part2_initpos" />-->
 <!--        <numeric data="0.0   0.31 0.01497 0.5 -0.5 0.5 -0.5" name="3_part3_initpos" />-->
         <numeric data="0.1 0.27 0.051527 1 0 0 0" name="wire1_initpos" />
-<!--        <numeric data="0.01 0.07 0.051527 1 0 0 0" name="insertion_hole_1_initpos" />-->
+<!--        <numeric data="0.0 0.2 0.07 0.7073883 0 0.7068252 0" name="insertion_hole_1_initpos" />-->
         <!-- horizontal-->
         <numeric data="-0.1 0.2 0.029527 1 0 0 0" name="table1_initpos" />
-<!--        0.1 -0.032 -0.06998405-->
+        0.1 -0.032 -0.06998405
         <!-- vertical-->
 <!--        <numeric data="-0.1 0.0 0.052527 0.7073883 -0.7068252 0 0" name="table1_initpos" />&ndash;&gt;-->
     </custom>
@@ -36,8 +36,8 @@
 
     <worldbody>
         <!--Wire-->
-<!--        <body name="wire1" pos="0.2 -0.07 0.034" quat="0.7073883 0 -0.7068252 0">-->
-        <body name="wire1" pos="0.1 -0.04005574 -0.06998405" quat="0.7073883 0 0 -0.7068252">
+        <body name="wire1" pos="0.1 0.27 0.051527" quat="0.7073883 0 -0.7068252 0">
+<!--        <body name="wire1" pos="0.1 -0.04005574 -0.06998405" quat="0.7073883 0 0 -0.7068252">-->
 <!--        <body name="wire1" pos="0 0.07 0.032" quat="1 0 0 0">&ndash;&gt;-->
 <!--            <include file="./rope_expanded_short.xml"/>-->
 <!--            <body xmlns:xi="http://www.w3.org/2001/XInclude">-->
@@ -130,8 +130,8 @@
         </body>
 
         <!-- Table -->
-<!--        <body name="table1" pos="0.0 0.0 0.0" quat="1 0 0 0"> -->
-        <body name="table1" pos="0.0 0.0 0.0" quat="0.7073883 0.7068252 0 0">
+        <body name="table1" pos="0 0 0" quat="1 0 0 0">
+<!--        <body name="table1" pos="0.0 0.0 0.0" quat="0.7073883 0.7068252 0 0">-->
             <geom conaffinity="0" contype="0" density="0" material="pencil-wood" mesh="part4" name="table1_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
             <geom density="50" name="noviz_collision_table1_0" pos="0 0 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.32 0.12 0.02" solref="0.001 1" type="box" />
             <site name="table1_corner_site1" pos="-0.385 -0.140 -0.023" rgba="0 0 0 0" size="0.005" />
@@ -144,11 +144,21 @@
             <site name="table1_corner_site8" pos="0.385 0.140 0.0233" rgba="0 0 0 0" size="0.005" />
             <site name="table1_bottom_site" pos="0.0 0.0 -0.0" rgba="0 0 0 0" size="0.0066" />
             <site name="table1_top_site" pos="0.0 0.0 0.02" rgba="0 0 0 0" size="0.0066" />
-            <!--horizontal-->
-<!--            <site group="0" name="table-wire,0,90,180,270,conn_site1" pos="0.2 -0.07 0.02" quat="0.707107 0 0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.0025" />-->
-            <!--vertical-->
-            <site group="0" name="table-wire,0,90,180,270,conn_site1" pos="0.1 -0.07 0.02" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />
+<!--            <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.1 -0.07 0.02" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />-->
             <site name="table1_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="0 0 0 0" size="0.18" />
+            <!--Hole-->
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016  0.00825" name="hole1_1_geom" pos="0.1 -0.07665  0.032" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_1" pos="0.1 -0.07665  0.032" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.0016  0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_2_geom" pos="0.09335 -0.07 0.032" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_2" pos="0.09335 -0.07 0.032" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_3_geom" pos="0.10665 -0.07 0.032" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_3" pos="0.10665 -0.07 0.032" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016 0.00825" name="hole1_4_geom" pos="0.1 -0.06335 0.032" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_4" pos="0.1 -0.06335 0.032" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.0016 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.0021 0.00825 0.00825" name="hole1_5_geom" pos="0.1 -0.07 0.022" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_5" pos="0.1 -0.07 0.022" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.0021 0.00825 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.1 -0.07 0.024" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />
+            <site name="insertion_hole_1_horizontal_radius_site" pos="0.1 -0.07 0.032" rgba="0 0 0 0" size="0.012" />
         </body>
 
         <!--Hole-->
@@ -175,22 +185,23 @@
 <!--&lt;!&ndash;              <site rgba="1 0 0 1" size="0.0006" pos="0 0 0" name="center_site"/>&ndash;&gt;-->
 <!--        </body>-->
 
-<!--        <body name="insertion_hole_1" pos="0.1 -0.032 -0.06998405" quat="0.7073883 0 0 0.7068252">-->
-<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0032  0.00875" name="hole1_1_geom" pos="0 -0.00665  0" solref="0.001 1" type="box" />&ndash;&gt;-->
-<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_1" pos="0 -0.00665  0" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.0032  0.00875" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
-<!--            <geom  pos="0 -0.00665  0" size="0.01 0.0016  0.00825 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.2" group="0" condim="4" material="smetal" />-->
-<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0031" name="hole1_2_geom" pos="0.0 0 -0.00665" solref="0.001 1" type="box" />&ndash;&gt;-->
-<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_2" pos="0.0 0 -0.00665" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.00625 0.0031" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
-<!--            <geom pos="0.0 0 -0.00665" size="0.01 0.00625 0.0016 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
-<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0031" name="hole1_3_geom" pos="0.0 0 -0.00665" solref="0.001 1" type="box" />&ndash;&gt;-->
-<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_3" pos="0.0 0 -0.00665" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.00625 0.0031" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
-<!--            <geom pos="0.0 0 0.00665" size="0.01 0.00625 0.0016 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
-<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0032 0.00875" name="hole1_4_geom" pos="0 0.00665 0" solref="0.001 1" type="box" />&ndash;&gt;-->
-<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_4" pos="0 0.00665 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.0032 0.00875" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
-<!--            <geom pos="0 0.00665 0" size="0.01 0.0016 0.00825 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
-<!--&lt;!&ndash;            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.0021 0.00875 0.00875" name="hole1_5_geom" pos="0.01 0 0" solref="0.001 1" type="box" />&ndash;&gt;-->
-<!--&lt;!&ndash;            <geom density="100" name="noviz_collision_hole1_5" pos="0.01 0 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.0021 0.00875 0.00875" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />&ndash;&gt;-->
-<!--            <geom pos="0.01 0 0" size="0.0021 0.00825 0.00825 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />-->
+<!--        <body name="insertion_hole_1" pos="0.1 -0.07 0.032" quat="0.7073883 0 0.7068252 0">-->
+<!--&lt;!&ndash;        <body name="insertion_hole_1" pos="0.1 -0.032 -0.06998405" quat="0.7073883 0 0 0.7068252">&ndash;&gt;-->
+<!--            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016  0.00825" name="hole1_1_geom" pos="0 -0.00665  0" solref="0.001 1" type="box" />-->
+<!--            <geom density="100" name="noviz_collision_hole1_1" pos="0 -0.00665  0" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.0016  0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />-->
+<!--&lt;!&ndash;            <geom  pos="0 -0.00665  0" size="0.01 0.0016  0.00825" type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.2" group="0" condim="4" material="smetal" />&ndash;&gt;-->
+<!--            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_2_geom" pos="0.0 0 -0.00665" solref="0.001 1" type="box" />-->
+<!--            <geom density="100" name="noviz_collision_hole1_2" pos="0.0 0 -0.00665" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />-->
+<!--&lt;!&ndash;            <geom pos="0.0 0 -0.00665" size="0.01 0.00625 0.0016 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />&ndash;&gt;-->
+<!--            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_3_geom" pos="0.0 0 0.00665" solref="0.001 1" type="box" />-->
+<!--            <geom density="100" name="noviz_collision_hole1_3" pos="0.0 0 0.00665" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />-->
+<!--&lt;!&ndash;            <geom pos="0.0 0 0.00665" size="0.01 0.00625 0.0016 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />&ndash;&gt;-->
+<!--            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016 0.00825" name="hole1_4_geom" pos="0 0.00665 0" solref="0.001 1" type="box" />-->
+<!--            <geom density="100" name="noviz_collision_hole1_4" pos="0 0.00665 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.01 0.0016 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />-->
+<!--&lt;!&ndash;            <geom pos="0 0.00665 0" size="0.01 0.0016 0.00825 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />&ndash;&gt;-->
+<!--            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.0021 0.00825 0.00825" name="hole1_5_geom" pos="0.01 0 0" solref="0.001 1" type="box" />-->
+<!--            <geom density="100" name="noviz_collision_hole1_5" pos="0.01 0 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.0021 0.00825 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />-->
+<!--&lt;!&ndash;            <geom pos="0.01 0 0" size="0.0021 0.00825 0.00825 " type="box" solimp="0.998 0.998 0.001" solref="0.02 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4" material="smetal" />&ndash;&gt;-->
 <!--            <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.008 0 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />-->
 <!--            <site name="insertion_hole_1_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="0 0 0 0" size="0.012" />-->
 <!--&lt;!&ndash;              <site rgba="1 0 0 1" size="0.001" pos="0.0108 0 0" name="handle_site"/>&ndash;&gt;-->

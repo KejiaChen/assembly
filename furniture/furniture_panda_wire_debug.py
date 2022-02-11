@@ -355,6 +355,7 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
         d = target_pos - cur_pos
         if noise is not None:
             d += noise
+        print("fine z dist", d)
         if abs(d[0]) < epsilon:
             d[0] = 0
         if abs(d[1]) < epsilon:
@@ -730,8 +731,14 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                                 )
                                 t_xy_fwd = t_fwd[0:2]
                             xy_ac = self.align2D(g_xy_fwd, t_xy_fwd, p["rot_eps_fine"])
+                            # if abs(xy_ac) < 0.05:
+                            #     xy_ac = 0
+                            # if abs(yz_ac) < 0.05:
+                            #     yz_ac = 0
+                            # if abs(yz_ac) < 0.05:
+                            #     xz_ac = 0
                         action[3:6] = [-xy_ac, yz_ac, xz_ac]
-                        if not np.any(action[0:6]):
+                        if not np.any(action[0:3]):
                             # action [7]: connect
                             action[7] = 1
                             self._phase_num += 1
@@ -789,7 +796,7 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                             self._config.max_episode_steps,
                         )
                         break
-                    if self._success:
+                    if self._success and self._phase == 'part_done':
                         break
 
                 if self._part_success:
@@ -797,7 +804,7 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                     self._used_sites.add(tconn)
                     self._part_success = False
 
-                if self._success:
+                if self._success and self._phase == 'part_done':
                     logger.warn(
                         "assembled (%s) in %d steps!",
                         self._config.furniture_name,

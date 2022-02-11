@@ -986,6 +986,8 @@ class FurnitureEnv(metaclass=EnvMeta):
                 ):
                     continue
                 if site1_pairs == site2_pairs[::-1]:
+                    # TODO: the align condition is unnecessary for peg in hole
+                    # if True:
                     if self._is_aligned(site1_name, site2_name):
                         logger.debug(
                             f"connect {site1_name} and {site2_name}, {self._connect_step}/{self._num_connect_steps}"
@@ -1431,6 +1433,7 @@ class FurnitureEnv(metaclass=EnvMeta):
             self.mujoco_model.resize_objects(resize_factor)
 
         if self._load_init_states and np.random.rand() > 0.2:
+            # load predefined initial positions
             self.set_init_qpos(np.random.choice(self._load_init_states))
 
         # reset simulation data and clear buffers
@@ -1847,7 +1850,9 @@ class FurnitureEnv(metaclass=EnvMeta):
                 self._set_camera_rotation(self._camera_ids[0], [0.0, 0.0, 0.0])
             elif self._camera_ids[0] == 1:
                 # side view
-                self._set_camera_position(self._camera_ids[0], [-2.5, 0.0, 0.5])
+                # self._set_camera_position(self._camera_ids[0], [-2.5, 0.0, 0.5])
+                # self._set_camera_rotation(self._camera_ids[0], [0.0, 0.0, 0.0])
+                self._set_camera_position(self._camera_ids[0], [-1.5, 0.5, 0.7])
                 self._set_camera_rotation(self._camera_ids[0], [0.0, 0.0, 0.0])
 
         # additional housekeeping
@@ -1905,7 +1910,8 @@ class FurnitureEnv(metaclass=EnvMeta):
             from .models.robots import Panda
 
             self.mujoco_robot = Panda(use_torque=use_torque)
-            self.gripper = {"right": gripper_factory("PandaGripper")}
+            # TODO: temporarily use two finger for convenience
+            self.gripper = {"right": gripper_factory("TwoFingerGripper")}
             self.gripper["right"].hide_visualization()
             self.mujoco_robot.add_gripper("right_hand", self.gripper["right"])
             self.mujoco_robot.set_base_xpos([0, 0.65, -0.7])
@@ -1989,6 +1995,7 @@ class FurnitureEnv(metaclass=EnvMeta):
         elif self._config.furn_size_rand != 0:
             rand = self._init_random(1, "resize")[0]
             resize_factor = 1 + rand
+            # TODO: temporarily set object as public variable
         self._objects = MujocoXMLObject(path, debug=self._debug, resize=resize_factor)
         self._objects.hide_visualization()
         part_names = self._objects.get_children_names()
