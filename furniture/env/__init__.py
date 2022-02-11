@@ -112,3 +112,10 @@ register(
     entry_point="furniture.env.furniture_gym:FurnitureGym",
     kwargs={"id": "IKEASawyerDense-v0", "name": "FurnitureSawyerDenseRewardEnv", "unity": False},
 )
+
+# add panda dense reward environment to Gym
+register(
+    id="furniture-panda-densereward-v0",
+    entry_point="furniture.env.furniture_gym:FurnitureGym",
+    kwargs={"id": "IKEAPandaDense-v0", "name": "FurniturePandaDenseRewardEnv", "unity": False},
+)

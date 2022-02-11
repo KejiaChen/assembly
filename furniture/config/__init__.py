@@ -53,6 +53,18 @@ def add_env_specific_arguments(env, parser):
 
         f.add_argument(parser)
 
+    elif env == "IKEAPandaGen-v0":
+        from . import furniture_panda_dense
+        from . import furniture_panda_gen
+
+        furniture_panda_dense.add_argument(parser)
+        furniture_panda_gen.add_argument(parser)
+
+    elif env == "furniture-panda-densereward-v0":
+        from . import furniture_panda_dense as f
+
+        f.add_argument(parser)
+
 
 def argparser():
     """
