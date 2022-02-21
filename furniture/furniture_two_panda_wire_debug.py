@@ -18,12 +18,12 @@ import os
 
 import furniture.env.transform_utils as T
 from furniture.env.furniture_panda import FurniturePandaEnv
-from furniture.env.furniture_panda_dense import FurniturePandaDenseRewardEnv
+from furniture.env.furniture_two_panda_dense import FurnitureTwoPandaDenseRewardEnv
 from furniture.env.models import background_names, furniture_name2id, furniture_xmls
 from furniture.util.logger import logger
 
 
-class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
+class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
     """
     Panda environment for assemblying furniture programmatically.
     """
@@ -395,9 +395,13 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
         # grip_site = "grip_site"
 
         # for two finger gripper
-        griptip_site = "griptip_site"
-        gripbase_site = "right_gripper_base_collision"
-        grip_site = "grip_site"
+        griptip_site = [None for _ in range(self.num_robots)]
+        gripbase_site = [None for _ in range(self.num_robots)]
+        grip_site = [None for _ in range(self.num_robots)]
+        for idx in range(self.num_robots):
+            griptip_site[idx] = self.grippers[idx]["right"].prefix + "griptip_site"
+            gripbase_site[idx] = self.grippers[idx]["right"].prefix +"right_gripper_base_collision"
+            grip_site[idx] = self.grippers[idx]["right"].prefix + "grip_site"
 
         # define assembly order and furniture specific variables
         grip_angles = None
@@ -425,6 +429,7 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
 
                 safepos_idx = 0
                 safepos.clear()
+                self.idx = 0
                 if "grip_init_pos" in p and p["grip_init_pos"][j] is not None:
                     gripbase_pos = self._get_pos(gripbase_site)
                     # gripbase_pos = [0.05866653 0.26087148 0.17194385]
@@ -443,13 +448,14 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                 # use conn_sites in site_recipe, other dynamically get closest/furthest conn_site from gripper
                 if "site_recipe" in p:
                     gconn, tconn = p["site_recipe"][j][:2]
-                    gconn_inverse = 'leg-table-inverse,0,90,180,270,conn_site2'
+                    # gconn_inverse = 'leg-table-inverse,0,90,180,270,conn_site2'
                 else:
                     gconn_names, tconn_names = self.get_conn_sites(
                         gbody_name, tbody_name
                     )
-                    gconn_inverse = 'leg-table-inverse,0,90,180,270,conn_site2'
-                    grip_pos = self._get_pos(grip_site)
+                    # gconn_inverse = 'leg-table-inverse,0,90,180,270,conn_site2'
+                    # TODO: two grip_sites
+                    grip_pos = self._get_pos(grip_site[0])
                     if p["use_closest"]:
                         gconn = self.get_closest_conn_site(gconn_names, grip_pos)
                     else:
@@ -463,6 +469,7 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                 if self._config.render:
                     self.render()
                     self.render()
+                    # TODO: debugging
                     # while True:
                     #     self.render()
                     #     ob, reward, _, info = self.step(np.zeros((8,)))
@@ -472,8 +479,9 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                 # initiate phases for single-part assembly
                 while self._phase != "part_done":
                     action = np.zeros((8,))
+                    action_robot2 = np.zeros((8,))
                     max_griptip_height = max(
-                        max_griptip_height, self._get_pos(griptip_site)[2]
+                        max_griptip_height, self._get_pos(griptip_site[0])[2]
                     )
                     # logger.info(self._phase)
                     if self._phase == "init_grip":
@@ -495,13 +503,13 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
 
                     elif self._phase == "xy_move_g":
                         action[6] = -1
-                        grip_xy_pos = self._get_pos(grip_site)[0:2]
+                        grip_xy_pos = self._get_pos(grip_site[0])[0:2]
                         g_xy_pos = self._get_leg_grasp_pos()[0:2]
                         action[0:2] = self.move_xy(
                             grip_xy_pos, g_xy_pos, p["eps"], noise=noise[self._phase]
                         )
 
-                        grip_xyz_pos = self._get_pos(grip_site)
+                        grip_xyz_pos = self._get_pos(grip_site[0])
                         g_xyz_pos = self._get_leg_grasp_pos()
                         pre_xyz_pos = g_xyz_pos + np.array([0, 0, 0.1])
                         action[0:3] = self.move_xyz(
@@ -512,7 +520,7 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                         action[6] = -1
                         if grip_angles is None or grip_angles[j] is not None:
                             # align gripper fingers with grip sites
-                            gripfwd_xy = self._get_forward_vector(grip_site)[0:2]
+                            gripfwd_xy = self._get_forward_vector(grip_site[0])[0:2]
                             # TODO: use the next line for panda gripper to correct xy rotation
                             # gvec_xy = np.array([self._get_leg_grasp_vector()[0], self._get_leg_grasp_vector()[2]])
                             gvec_xy = self._get_leg_grasp_vector()[0:2]
@@ -523,7 +531,7 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                             )
                             # xy_ac = self.align2D(gripfwd_xy, gvec_xy, p['rot_eps'])
                             # point gripper z downwards
-                            gripvec = self._get_up_vector(grip_site)
+                            gripvec = self._get_up_vector(grip_site[0])
                             # up vector should in z direction
                             yz_ac = self.align2D(
                                 gripvec[1:3], align_g_tgt, p["rot_eps"]
@@ -534,7 +542,7 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                             rot_action = [xy_ac, yz_ac, xz_ac]
                             # if xy_ac == 0:
                             if rot_action == [0, 0, 0]:
-                                grip_pos = self._get_pos(grip_site)[0:2]
+                                grip_pos = self._get_pos(grip_site[0])[0:2]
                                 g_pos = self._get_leg_grasp_pos()
                                 action[0:2] = self.move_xy(
                                     grip_pos, g_pos[0:2], p["eps"]
@@ -557,8 +565,8 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
 
                     elif self._phase == "z_move_g":
                         action[6] = -1
-                        grip_pos = self._get_pos(grip_site)
-                        grip_tip = self._get_pos(griptip_site)
+                        grip_pos = self._get_pos(grip_site[0])
+                        grip_tip = self._get_pos(griptip_site[0])
                         g_pos = self._get_leg_grasp_pos()
                         d = (g_pos) - grip_pos
                         if z_move_g_prev is None:
@@ -579,7 +587,7 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                             self._phase_num += 1
                             print("the next phase", self._phases_gen[self._phase_num])
                             if p["waypoints"][j] is not None:
-                                gripbase_pos = self._get_pos(gripbase_site)
+                                gripbase_pos = self._get_pos(gripbase_site[0])
                                 for pos in p["waypoints"][j]:
                                     safepos.append(gripbase_pos + pos)
                                     print("pick up", safepos[-1])
@@ -607,7 +615,7 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
                                     )
                             tconn_pos = self.sim.data.get_site_xpos(tconn)
                         else:
-                            gripbase_pos = self._get_pos(gripbase_site)
+                            gripbase_pos = self._get_pos(gripbase_site[0])
                             action[0:3] = self.trans_scaling*self.move_xyz(
                                 gripbase_pos,
                                 safepos[safepos_idx],
@@ -835,21 +843,21 @@ class FurniturePandaGenEnv(FurniturePandaDenseRewardEnv):
 def main():
     from furniture.config import create_parser
 
-    parser = create_parser(env="IKEAPandaGen-v0")
+    parser = create_parser(env="IKEATwoPandaGen-v0", single_arm=False)
     parser.set_defaults(render=True)
     parser.set_defaults(start_count=0)
     parser.set_defaults(furniture_name="wire_insertion")
     parser.set_defaults(n_demos=100)
     parser.set_defaults(camera_ids=[0])
-    parser.set_defaults(debug=False)
-    parser.set_defaults(unity=False)
+    parser.set_defaults(debug=True)
+    parser.set_defaults(init_base_position=[[0, 0.65, -0.7], [0.7, 0.65, -0.7]])
 
     config, unparsed = parser.parse_known_args()
     if len(unparsed):
         logger.error("Unparsed argument is detected:\n%s", unparsed)
         return
 
-    env = FurniturePandaGenEnv(config)
+    env = FurnitureTwoPandaGenEnv(config)
     env.generate_demos(config.n_demos)
 
 

@@ -35,7 +35,7 @@ def make_env(name, config=None):
     if config is None:
         import argparse
         import config.furniture as furniture_config
-        from util import str2bool
+        from furniture.util import str2bool
 
         parser = argparse.ArgumentParser()
         furniture_config.add_argument(parser)

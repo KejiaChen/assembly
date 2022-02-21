@@ -10,14 +10,16 @@ class Panda(Robot):
     def __init__(
         self,
         use_torque=False,
-        xml_path="robots/panda/robot.xml"
+        xml_path="robots/panda/robot.xml",
+        idn=0,
     ):
         if use_torque:
             xml_path = "robots/panda/robot_torque.xml"
-        super().__init__(xml_path_completion(xml_path))
+        super().__init__(xml_path_completion(xml_path), idn=idn)
 
         self.bottom_offset = np.array([0, 0, -0.913])
         self.set_joint_damping()
+        # TODO: should model name also be changed?
         self._model_name = "panda"
         # Careful of init_qpos -- certain init poses cause ik controller to go unstable (e.g: pi/4 instead of -pi/4
         # for the final joint angle)
@@ -25,12 +27,12 @@ class Panda(Robot):
 
     def set_base_xpos(self, pos):
         """Places the robot on position @pos."""
-        node = self.worldbody.find("./body[@name='link0']")
+        node = self.worldbody.find("./body[@name='{}']".format(self.name+"_link0"))
         node.set("pos", array_to_string(pos - self.bottom_offset))
 
     def set_base_xquat(self, quat):
         """Places the robot on position @quat."""
-        node = self.worldbody.find("./body[@name='link0']")
+        node = self.worldbody.find("./body[@name='{}']".format(self.name+"_link0"))
         node.set("quat", array_to_string(quat))
 
     def set_joint_damping(self, damping=np.array((0.1, 0.1, 0.1, 0.1, 0.1, 0.01, 0.01))):
@@ -55,26 +57,32 @@ class Panda(Robot):
 
     @property
     def joints(self):
-        return ["joint{}".format(x) for x in range(1, 8)]
+        return self._joints
 
     @property
     def init_qpos(self):
         return self._init_qpos
 
+    # @init_qpos.setter
+    # def init_qpos(self, init_qpos):
+    #     self._init_qpos = init_qpos
+
     @property
     def contact_geoms(self):
-        return ["link{}_collision".format(x) for x in range(1, 8)]
+        return [self.name+"link{}_collision".format(x) for x in range(1, 8)]
 
     @property
     def _base_body(self):
-        node = self.worldbody.find("./body[@name='link0']")
+        # alternatively
+        # node = self._elements["root_body"]
+        node = self.worldbody.find("./body[@name='{}']".format(self.name+"_link0"))
         return node
 
     @property
     def _link_body(self):
-        return ["link1", "link2", "link3", "link4", "link5", "link6", "link7"]
+        return [self.name+"_link{}".format(x) for x in range(1, 8)]
 
     @property
     def _joints(self):
-        return ["joint1", "joint2", "joint3", "joint4", "joint5", "joint6", "joint7"]
+        return [self.name+"_joint{}".format(x) for x in range(1, 8)]
 

@@ -773,6 +773,7 @@ def main():
     parser.set_defaults(start_count=0)
     parser.set_defaults(furniture_name="table_lack_0825")
     parser.set_defaults(n_demos=100)
+    parser.set_defaults(unity=True)
 
     config, unparsed = parser.parse_known_args()
     if len(unparsed):

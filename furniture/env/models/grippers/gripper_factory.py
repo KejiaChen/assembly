@@ -11,7 +11,7 @@ from .jaco_gripper import JacoGripper
 from .fetch_gripper import FetchGripper
 
 
-def gripper_factory(name):
+def gripper_factory(name, idn=0):
     """
     Genreator for grippers
 
@@ -27,7 +27,7 @@ def gripper_factory(name):
         XMLError: [description]
     """
     if name == "TwoFingerGripper":
-        return TwoFingerGripper()
+        return TwoFingerGripper(idn)
     if name == "LeftTwoFingerGripper":
         return LeftTwoFingerGripper()
     if name == "PR2Gripper":

@@ -47,7 +47,7 @@ NEW_CONTROLLERS = [
 ]
 
 
-class FurnitureEnv(metaclass=EnvMeta):
+class FurnitureTwoEnv(metaclass=EnvMeta):
     """
     Base class for IKEA furniture assembly environment.
     """
@@ -79,6 +79,10 @@ class FurnitureEnv(metaclass=EnvMeta):
         self._screen_width = config.screen_width
         self._screen_height = config.screen_height
 
+        # robots = list(robots) if type(robots) is list or type(robots) is tuple else [robots]
+        self.robot_names = config.agent_type
+        self.num_robots = len(config.agent_type)
+
         # The setting of config.agent_type is in the init of furniture_panda.py
         self._agent_type = config.agent_type
         self._control_type = config.control_type
@@ -86,11 +90,37 @@ class FurnitureEnv(metaclass=EnvMeta):
         self._discrete_grip = config.discrete_grip
         self._rescale_actions = config.rescale_actions
         self._auto_align = config.auto_align
+        # self._robot_init_pose = config.init_base_position
+        # self._robot_init_quat = config.init_base_quat
 
-        if self._agent_type == "Baxter":
-            self._arms = ["right", "left"]
-        else:
-            self._arms = ["right"]
+        robot_configs = [{} for _ in range(self.num_robots)]
+        self.robot_configs = [
+            dict(
+                **{
+                    "agent_type": config.agent_type[idx],
+                    "control_type": self._control_type,
+                    # "mount_type": mount_types[idx],
+                    # "initialization_noise": initialization_noise[idx],
+                    "control_freq": self._control_freq,
+                    "discrete_grip": self._discrete_grip,
+                    "rescale_actions": self._rescale_actions,
+                    "auto_align": self._auto_align,
+                    "arms": ["right"],
+                    "init_pos": config.init_base_position[idx],
+                    "init_quat": config.init_base_quat[idx],
+                },
+                **robot_config,
+            )
+            for idx, robot_config in enumerate(robot_configs)
+        ]
+
+
+        # TODO : Baxter arms
+        # if self._agent_type == "Baxter":
+        #     self._arms = ["right", "left"]
+        # else:
+        #     self._arms = ["right"]
+        #
 
         if self._control_type in NEW_CONTROLLERS:
             self._load_controller(
@@ -135,7 +165,9 @@ class FurnitureEnv(metaclass=EnvMeta):
             config.furniture_id = furniture_name2id[config.furniture_name]
         else:
             furniture_name = furniture_names[config.furniture_id]
-        self.file_prefix = self._agent_type + "_" + furniture_name + "_"
+        self.file_prefix = "_" + furniture_name + "_"
+        for agent in self.robot_configs:
+            self.file_prefix = agent["agent_type"] + self.file_prefix
 
         self._record_demo = config.record_demo
         if self._record_demo:
@@ -164,7 +196,7 @@ class FurnitureEnv(metaclass=EnvMeta):
         self._preassembled = config.preassembled
         self._num_connects = config.num_connects
 
-        if self._agent_type != "Cursor" and self._control_type in [
+        if all(agent["agent_type"] != "Cursor" for agent in self.robot_configs) and self._control_type in [
             "ik",
             "ik_quaternion",
         ]:
@@ -411,7 +443,8 @@ class FurnitureEnv(metaclass=EnvMeta):
         if a is None:
             a = np.zeros(self.dof)
 
-        if self._agent_type == "Cursor":
+        # TODO: add cursor
+        if all(agent == "Cursor" for agent in self._agent_type):
             self._step_discrete(a.copy())
             self._do_simulation(None)
 
@@ -1422,9 +1455,12 @@ class FurnitureEnv(metaclass=EnvMeta):
             # construct mujoco xml for furniture_id
             self._furniture_id = furniture_id or self._config.furniture_id
             self._reset_internal()
-            self.file_prefix = (
-                self._agent_type + "_" + furniture_names[self._furniture_id] + "_"
-            )
+            # self.file_prefix = (
+            #     self._agent_type + "_" + furniture_names[self._furniture_id] + "_"
+            # )
+            self.file_prefix = "_" + furniture_names[self._furniture_id] + "_"
+            for agent in self.robot_configs:
+                self.file_prefix = agent["agent_type"] + self.file_prefix
             if self.vid_rec:
                 self.vid_rec.set_outfile(self.file_prefix)
 
@@ -1446,9 +1482,9 @@ class FurnitureEnv(metaclass=EnvMeta):
         for geom_id, body_id in enumerate(self.sim.model.geom_bodyid):
             body_name = self.sim.model.body_names[body_id]
             geom_name = self.sim.model.geom_id2name(geom_id)
-            if body_name not in self._object_names and self.mujoco_robot.is_robot_part(
-                geom_name
-            ):
+            if body_name not in self._object_names and any([self.mujoco_robots[i].is_robot_part(
+            geom_name
+            ) for i in range(self.num_robots)]):
                 robot_col[geom_name] = (
                     self.sim.model.geom_contype[geom_id],
                     self.sim.model.geom_conaffinity[geom_id],
@@ -1514,7 +1550,7 @@ class FurnitureEnv(metaclass=EnvMeta):
                 geom_name = self.sim.model.geom_id2name(geom_id)
                 if (
                     body_name not in self._object_names
-                    and self.mujoco_robot.is_robot_part(geom_name)
+                    and any([self.mujoco_robots[i].is_robot_part(geom_name) for i in range(self.num_robots)])
                 ):
                     contype, conaffinity = robot_col[geom_name]
                     self.sim.model.geom_contype[geom_id] = contype
@@ -1569,17 +1605,24 @@ class FurnitureEnv(metaclass=EnvMeta):
                     self.sim.step()
                     self._slow_objects()
 
+        # print("debugging")
+
         if self._init_qpos:
             self.sim.forward()
         else:
             # gravity compensation
             if self._agent_type != "Cursor":
-                self.sim.data.qfrc_applied[
-                    self._ref_joint_vel_indexes_all
-                ] = self.sim.data.qfrc_bias[self._ref_joint_vel_indexes_all]
-                self.sim.data.qfrc_applied[
-                    self._ref_gripper_joint_vel_indexes_all
-                ] = self.sim.data.qfrc_bias[self._ref_gripper_joint_vel_indexes_all]
+                for indexes in self._ref_joint_vel_indexes_all:
+                    self.sim.data.qfrc_applied[indexes] = self.sim.data.qfrc_bias[indexes]
+                for gripper_indexes in self._ref_gripper_joint_vel_indexes_all:
+                    self.sim.data.qfrc_applied[gripper_indexes] = self.sim.data.qfrc_bias[gripper_indexes]
+
+                # self.sim.data.qfrc_applied[
+                #     self._ref_joint_vel_indexes_all
+                # ] = self.sim.data.qfrc_bias[self._ref_joint_vel_indexes_all]
+                # self.sim.data.qfrc_applied[
+                #     self._ref_gripper_joint_vel_indexes_all
+                # ] = self.sim.data.qfrc_bias[self._ref_gripper_joint_vel_indexes_all]
 
             # set initial pose of an agent
             self._initialize_robot_pos()
@@ -1592,7 +1635,7 @@ class FurnitureEnv(metaclass=EnvMeta):
                 geom_name = self.sim.model.geom_id2name(geom_id)
                 if (
                     body_name not in self._object_names
-                    and self.mujoco_robot.is_robot_part(geom_name)
+                    and any([self.mujoco_robots[i].is_robot_part(geom_name) for i in range(self.num_robots)])
                 ):
                     contype, conaffinity = robot_col[geom_name]
                     self.sim.model.geom_contype[geom_id] = contype
@@ -1600,12 +1643,16 @@ class FurnitureEnv(metaclass=EnvMeta):
 
             # gravity compensation
             if self._agent_type != "Cursor":
-                self.sim.data.qfrc_applied[
-                    self._ref_joint_vel_indexes_all
-                ] = self.sim.data.qfrc_bias[self._ref_joint_vel_indexes_all]
-                self.sim.data.qfrc_applied[
-                    self._ref_gripper_joint_vel_indexes_all
-                ] = self.sim.data.qfrc_bias[self._ref_gripper_joint_vel_indexes_all]
+                for indexes in self._ref_joint_vel_indexes_all:
+                    self.sim.data.qfrc_applied[indexes] = self.sim.data.qfrc_bias[indexes]
+                for gripper_indexes in self._ref_gripper_joint_vel_indexes_all:
+                    self.sim.data.qfrc_applied[gripper_indexes] = self.sim.data.qfrc_bias[gripper_indexes]
+                # self.sim.data.qfrc_applied[
+                #     self._ref_joint_vel_indexes_all
+                # ] = self.sim.data.qfrc_bias[self._ref_joint_vel_indexes_all]
+                # self.sim.data.qfrc_applied[
+                #     self._ref_gripper_joint_vel_indexes_all
+                # ] = self.sim.data.qfrc_bias[self._ref_gripper_joint_vel_indexes_all]
 
             # stablize robot
             for _ in range(100):
@@ -1633,25 +1680,34 @@ class FurnitureEnv(metaclass=EnvMeta):
 
         # gravity compensation
         if self._agent_type != "Cursor":
-            self.sim.data.qfrc_applied[
-                self._ref_joint_vel_indexes_all
-            ] = self.sim.data.qfrc_bias[self._ref_joint_vel_indexes_all]
-            self.sim.data.qfrc_applied[
-                self._ref_gripper_joint_vel_indexes_all
-            ] = self.sim.data.qfrc_bias[self._ref_gripper_joint_vel_indexes_all]
+            for indexes in self._ref_joint_vel_indexes_all:
+                self.sim.data.qfrc_applied[indexes] = self.sim.data.qfrc_bias[indexes]
+            for gripper_indexes in self._ref_gripper_joint_vel_indexes_all:
+                self.sim.data.qfrc_applied[gripper_indexes] = self.sim.data.qfrc_bias[gripper_indexes]
+            # self.sim.data.qfrc_applied[
+            #     self._ref_joint_vel_indexes_all
+            # ] = self.sim.data.qfrc_bias[self._ref_joint_vel_indexes_all]
+            # self.sim.data.qfrc_applied[
+            #     self._ref_gripper_joint_vel_indexes_all
+            # ] = self.sim.data.qfrc_bias[self._ref_gripper_joint_vel_indexes_all]
 
         for _ in range(100):
             self.sim.forward()
             self.sim.step()
 
-        if self._agent_type not in ["Cursor"]:
-            self._initial_right_hand_quat = self._right_hand_quat
-            if self._agent_type == "Baxter":
-                self._initial_left_hand_quat = self._left_hand_quat
+        self._initial_right_hand_quat = [None for _ in range(self.num_robots)]
+        self._initial_left_hand_quat = [None for _ in range(self.num_robots)]
+        for idx in range(self.num_robots):
+            # correct properties into lists
+            self.idx = idx
+            if self.robot_configs[idx]["agent_type"] not in ["Cursor"]:
+                self._initial_right_hand_quat[self.idx] = self._right_hand_quat
+                if self._agent_type == "Baxter":
+                    self._initial_left_hand_quat[self.idx] = self._left_hand_quat
 
-            if self._control_type in ["ik", "ik_quaternion"]:
-                # set up ik controller
-                self._controller.sync_state()
+                if self.robot_configs[idx]["control_type"] in ["ik", "ik_quaternion"]:
+                    # set up ik controller
+                    self._controller[idx].sync_state()
 
         # set next subtask
         self._get_next_subtask()
@@ -1745,7 +1801,7 @@ class FurnitureEnv(metaclass=EnvMeta):
         # Arm action
         last = 0
         for arm in self._arms:
-            arm_action = action[last : last + self.controller[arm].control_dim]
+            arm_action = action[last: last + self.controller[arm].control_dim]
             last += self.controller[arm].control_dim
             # First, get joint space action
             self.controller[arm].update_model(
@@ -1767,16 +1823,18 @@ class FurnitureEnv(metaclass=EnvMeta):
         Initializes robot posision with random noise perturbation.
         """
         if self._agent_type not in ["Cursor"]:
-            noise = self._init_random(self.mujoco_robot.init_qpos.shape, "agent")
-            self.sim.data.qpos[self._ref_joint_pos_indexes_all] = (
-                self.mujoco_robot.init_qpos + noise
-            )
-            for arm in self._arms:
-                self.sim.data.qpos[
-                    self._ref_gripper_joint_pos_indexes[arm]
-                ] = self.gripper[
-                    arm
-                ].init_qpos  # open
+            for idx in range(self.num_robots):
+                noise = self._init_random(self.mujoco_robots[idx].init_qpos.shape, "agent")
+                self.sim.data.qpos[self._ref_joint_pos_indexes_all[idx]] = (
+                    self.mujoco_robots[idx].init_qpos + noise
+                )
+                for arm in self.robot_configs[idx]["arms"]:
+                    # correct self._ref_gripper_joint_pos_indexes to size 2
+                    self.sim.data.qpos[
+                        self._ref_gripper_joint_pos_indexes[idx][arm]
+                    ] = self.grippers[idx][
+                        arm
+                    ].init_qpos  # open
 
         elif self._agent_type == "Cursor":
             self._set_pos("cursor0", [-0.2, 0.0, self._move_speed / 2])
@@ -1818,6 +1876,7 @@ class FurnitureEnv(metaclass=EnvMeta):
         Resets simulation internal configurations.
         """
         # instantiate simulation from MJCF model
+        # TODO: add init pos and quat
         self._load_model_robot()
         self._load_model_arena()
         self._load_model_object()
@@ -1840,6 +1899,11 @@ class FurnitureEnv(metaclass=EnvMeta):
         # construct mujoco model from xml
         self.mjpy_model = self.mujoco_model.get_model(mode="mujoco_py")
         self.sim = mujoco_py.MjSim(self.mjpy_model)
+        # # DEBUGGING
+        # viewer = mujoco_py.MjViewer(self.sim)
+        # while True:
+        #     viewer.render()
+
         self.initialize_time()
 
         self._is_render = self._visual_ob or self._render_mode != "no"
@@ -1864,113 +1928,122 @@ class FurnitureEnv(metaclass=EnvMeta):
         # necessary to refresh MjData
         self.sim.forward()
 
-        # setup mocap for ik control
-        if (
-            self._control_type in ["ik", "ik_quaternion"]
-            and self._agent_type != "Cursor"
-        ):
-            from .models import assets_root
+        # controller for each robot
+        self._controller = [{} for _ in range(self.num_robots)]
+        for idx, controller in enumerate(self._controller):
+            self._controller_idx = idx
+            # setup mocap for ik control
+            if (
+                self.robot_configs[idx]["control_type"] in ["ik", "ik_quaternion"]
+                and self._agent_type != "Cursor"
+            ):
+                from .models import assets_root
 
-            if self._agent_type == "Sawyer":
-                from .controllers import SawyerIKController as IKController
-            elif self._agent_type == "Baxter":
-                from .controllers import BaxterIKController as IKController
-            elif self._agent_type == "Panda":
-                from .controllers import PandaIKController as IKController
-            elif self._agent_type == "Jaco":
-                from .controllers import JacoIKController as IKController
-            elif self._agent_type == "Fetch":
-                from .controllers import FetchIKController as IKController
-            else:
-                raise ValueError
+                if self.robot_configs[idx]["agent_type"] == "Sawyer":
+                    from .controllers import SawyerIKController as IKController
+                elif self.robot_configs[idx]["agent_type"] == "Baxter":
+                    from .controllers import BaxterIKController as IKController
+                elif self.robot_configs[idx]["agent_type"] == "Panda":
+                    from .controllers import PandaIKController as IKController
+                elif self.robot_configs[idx]["agent_type"] == "Jaco":
+                    from .controllers import JacoIKController as IKController
+                elif self.robot_configs[idx]["agent_type"] == "Fetch":
+                    from .controllers import FetchIKController as IKController
+                else:
+                    raise ValueError
 
-            self._controller = IKController(
-                bullet_data_path=os.path.join(assets_root, "bullet_data"),
-                robot_jpos_getter=self._robot_jpos_getter,
-            )
-        elif self._control_type in NEW_CONTROLLERS:
-            for arm in self._arms:
-                self.controller[arm].reset()
+                self._controller[idx] = IKController(
+                    bullet_data_path=os.path.join(assets_root, "bullet_data"),
+                    robot_jpos_getter=self._robot_jpos_getter,
+                )
+
+            elif self.robot_configs[idx]["control_type"] in NEW_CONTROLLERS:
+                for arm in self.robot_configs[idx]["arms"]:
+                    self.controller[arm].reset()
 
     def _load_model_robot(self):
         """
         Loads sawyer, baxter, or cursor
         """
         use_torque = self._control_type in ["torque"] + NEW_CONTROLLERS
-        if self._agent_type == "Sawyer":
-            from .models.robots import Sawyer
+        self.mujoco_robots = [None for _ in range(self.num_robots)]
+        self.grippers = [None for _ in range(self.num_robots)]
 
-            self.mujoco_robot = Sawyer(use_torque=use_torque)
-            self.gripper = {"right": gripper_factory("TwoFingerGripper")}
-            self.gripper["right"].hide_visualization()
-            self.mujoco_robot.add_gripper("right_hand", self.gripper["right"])
-            self.mujoco_robot.set_base_xpos([0, 0.65, -0.7])
-            self.mujoco_robot.set_base_xquat([1, 0, 0, -1])
+        for idx in range(self.num_robots):
+            robot_config = self.robot_configs[idx]
+            if robot_config['agent_type'] == "Sawyer":
+                from .models.robots import Sawyer
 
-        elif self._agent_type == "Panda":
-            from .models.robots import Panda
+                self.mujoco_robots[idx] = Sawyer(use_torque=use_torque)
+                self.gripper = {"right": gripper_factory("TwoFingerGripper", idn=idx)}
+                self.gripper["right"].hide_visualization()
+                self.mujoco_robots[idx].add_gripper("right_hand", self.gripper["right"])
+                self.mujoco_robots[idx].set_base_xpos(robot_config["init_pos"])
+                self.mujoco_robots[idx].set_base_xquat(robot_config["init_quat"])
 
-            self.mujoco_robot = Panda(use_torque=use_torque)
-            # TODO: temporarily use two finger for convenience
-            # self.gripper = {"right": gripper_factory("PandaGripper")}
-            self.gripper = {"right": gripper_factory("TwoFingerGripper")}
-            self.gripper["right"].hide_visualization()
-            self.mujoco_robot.add_gripper(self.mujoco_robot.prefix+"right_hand", self.gripper["right"])
-            self.mujoco_robot.set_base_xpos([0, 0.65, -0.7])
-            self.mujoco_robot.set_base_xquat([1, 0, 0, -1])
+            elif robot_config['agent_type'] == "Panda":
+                from .models.robots import Panda
 
-        elif self._agent_type == "Jaco":
-            from .models.robots import Jaco
+                self.mujoco_robots[idx] = Panda(use_torque=use_torque, idn=idx)
+                # TODO: temporarily use two finger for convenience
+                self.grippers[idx] = {"right": gripper_factory("TwoFingerGripper", idn=idx)}
+                self.grippers[idx]["right"].hide_visualization()
+                self.mujoco_robots[idx].add_gripper(self.mujoco_robots[idx].prefix+"right_hand", self.grippers[idx]["right"])
+                self.mujoco_robots[idx].set_base_xpos(robot_config["init_pos"])
+                self.mujoco_robots[idx].set_base_xquat(robot_config["init_quat"])
 
-            self.mujoco_robot = Jaco(use_torque=use_torque)
-            self.gripper = {"right": gripper_factory("JacoGripper")}
-            self.gripper["right"].hide_visualization()
-            self.mujoco_robot.add_gripper("right_hand", self.gripper["right"])
-            self.mujoco_robot.set_base_xpos([0, 0.65, -0.7])
-            self.mujoco_robot.set_base_xquat([1, 0, 0, -1])
+            elif robot_config['agent_type'] == "Jaco":
+                from .models.robots import Jaco
 
-        elif self._agent_type == "Baxter":
-            from .models.robots import Baxter
+                self.mujoco_robots[idx] = Jaco(use_torque=use_torque)
+                self.gripper = {"right": gripper_factory("JacoGripper")}
+                self.gripper["right"].hide_visualization()
+                self.mujoco_robots[idx].add_gripper("right_hand", self.gripper["right"])
+                self.mujoco_robots[idx].set_base_xpos(robot_config["init_pos"])
+                self.mujoco_robots[idx].set_base_xquat(robot_config["init_quat"])
 
-            self.mujoco_robot = Baxter(use_torque=use_torque)
-            self.gripper = {
-                "right": gripper_factory("TwoFingerGripper"),
-                "left": gripper_factory("LeftTwoFingerGripper"),
-            }
-            self.gripper["right"].hide_visualization()
-            self.gripper["left"].hide_visualization()
-            self.mujoco_robot.add_gripper("right_hand", self.gripper["right"])
-            self.mujoco_robot.add_gripper("left_hand", self.gripper["left"])
-            self.mujoco_robot.set_base_xpos([0, 0.65, -0.7])
-            self.mujoco_robot.set_base_xquat([1, 0, 0, -1])
+            elif robot_config['agent_type'] == "Baxter":
+                from .models.robots import Baxter
 
-        elif self._agent_type == "Fetch":
-            from .models.robots import Fetch
+                self.mujoco_robots[idx] = Baxter(use_torque=use_torque)
+                self.gripper = {
+                    "right": gripper_factory("TwoFingerGripper"),
+                    "left": gripper_factory("LeftTwoFingerGripper"),
+                }
+                self.gripper["right"].hide_visualization()
+                self.gripper["left"].hide_visualization()
+                self.mujoco_robots[idx].add_gripper("right_hand", self.gripper["right"])
+                self.mujoco_robots[idx].add_gripper("left_hand", self.gripper["left"])
+                self.mujoco_robots[idx].set_base_xpos(robot_config["init_pos"])
+                self.mujoco_robots[idx].set_base_xquat(robot_config["init_quat"])
 
-            self.mujoco_robot = Fetch(use_torque=use_torque)
-            self.gripper = {"right": gripper_factory("FetchGripper")}
-            self.gripper["right"].hide_visualization()
-            self.mujoco_robot.add_gripper("right_hand", self.gripper["right"])
-            self.mujoco_robot.set_base_xpos([0, 0.65, -0.7])
-            self.mujoco_robot.set_base_xquat([1, 0, 0, -1])
+            elif robot_config['agent_type'] == "Fetch":
+                from .models.robots import Fetch
 
-        elif self._agent_type == "Cursor":
-            from .models.robots import Cursor
+                self.mujoco_robots[idx] = Fetch(use_torque=use_torque)
+                self.gripper = {"right": gripper_factory("FetchGripper")}
+                self.gripper["right"].hide_visualization()
+                self.mujoco_robots[idx].add_gripper("right_hand", self.gripper["right"])
+                self.mujoco_robots[idx].set_base_xpos(robot_config["init_pos"])
+                self.mujoco_robots[idx].set_base_xquat(robot_config["init_quat"])
 
-            self.mujoco_robot = Cursor()
-            self.mujoco_robot.set_size(self._move_speed / 2)
-            self.mujoco_robot.set_xpos([0, 0, self._move_speed / 2])
+            elif robot_config['agent_type'] == "Cursor":
+                from .models.robots import Cursor
 
-        # hide an agent
-        if not self._config.render_agent:
-            for x in self.mujoco_robot.worldbody.findall(".//geom"):
-                x.set("rgba", "0 0 0 0")
+                self.mujoco_robots[idx] = Cursor()
+                self.mujoco_robots[idx].set_size(self._move_speed / 2)
+                self.mujoco_robots[idx].set_xpos([0, 0, self._move_speed / 2])
 
-        # no collision with an agent
-        if self._config.no_collision:
-            for x in self.mujoco_robot.worldbody.findall(".//geom"):
-                x.set("conaffinity", "0")
-                x.set("contype", "0")
+            # hide an agent
+            if not self._config.render_agent:
+                for x in self.mujoco_robots[idx].worldbody.findall(".//geom"):
+                    x.set("rgba", "0 0 0 0")
+
+            # no collision with an agent
+            if self._config.no_collision:
+                for x in self.mujoco_robots[idx].worldbody.findall(".//geom"):
+                    x.set("conaffinity", "0")
+                    x.set("contype", "0")
 
     def _load_model_arena(self):
         """
@@ -1999,7 +2072,7 @@ class FurnitureEnv(metaclass=EnvMeta):
             resize_factor = 1 + rand
         self._objects = MujocoXMLObject(path, debug=self._debug, resize=resize_factor)
         self._objects.hide_visualization()
-        # TODO: only get children name of the first layer
+        # only get children name of the first layer
         part_names = self._objects.get_children_names()
 
         # furniture pieces
@@ -2031,7 +2104,7 @@ class FurnitureEnv(metaclass=EnvMeta):
                 self.init_quat[key] = qpos.quat
         self.mujoco_model = FloorTask(
             self.mujoco_arena,
-            self.mujoco_robot,
+            self.mujoco_robots,
             self.mujoco_objects,
             self.mujoco_equality,
             self.mujoco_tendon,
@@ -2916,25 +2989,29 @@ class FurnitureEnv(metaclass=EnvMeta):
         #     for qvel_addr in self._ref_joint_vel_indexes[arm]:
         #         self.sim.data.qvel[qvel_addr] = 0.0
         # self.sim.forward()
+        # TODO: two robots, two controller. replace 0 with the id
+        # TODO: approach 1 -- run step() for each robot separtely
 
+        idx = 0
         connect = action[-1]
 
         if self._control_type == "ik":
-            if self._agent_type in ["Sawyer", "Panda", "Jaco", "Fetch"]:
+            if self.robot_configs[idx]["agent_type"] in ["Sawyer", "Panda", "Jaco", "Fetch"]:
                 action[:3] = action[:3] * self._move_speed
                 action[:3] = [-action[1], action[0], action[2]]
-                gripper_pos = self.sim.data.get_body_xpos("right_hand")
+                gripper_pos = self.sim.data.get_body_xpos(self.mujoco_robots[idx].prefix + "right_hand")
                 d_pos = self._bounded_d_pos(action[:3], gripper_pos)
-                self._initial_right_hand_quat = T.euler_to_quat(
-                    action[3:6] * self._rotate_speed, self._initial_right_hand_quat
+                self._initial_right_hand_quat[idx] = T.euler_to_quat(
+                    action[3:6] * self._rotate_speed, self._initial_right_hand_quat[idx]
                 )
                 d_quat = T.quat_multiply(
-                    T.quat_inverse(self._right_hand_quat), self._initial_right_hand_quat
+                    T.quat_inverse(self._right_hand_quat), self._initial_right_hand_quat[idx]
                 )
                 gripper_dis = action[-2]
                 action = np.concatenate([d_pos, d_quat, [gripper_dis]])
 
-            elif self._agent_type == "Baxter":
+            # TODO: fix Baxter
+            elif self.robot_configs[idx]["agent_type"] == "Baxter":
                 action[:3] = action[:3] * self._move_speed
                 action[:3] = [-action[1], action[0], action[2]]
                 action[6:9] = action[6:9] * self._move_speed
@@ -2969,15 +3046,15 @@ class FurnitureEnv(metaclass=EnvMeta):
                 )
 
             input_1 = self._make_input(action[:7], self._right_hand_quat)
-            if self._agent_type in ["Sawyer", "Panda", "Fetch"]:
-                velocities = self._controller.get_control(**input_1)
+            if self.robot_configs[idx]["agent_type"] in ["Sawyer", "Panda", "Fetch"]:
+                velocities = self._controller[idx].get_control(**input_1)
                 low_action = np.concatenate([velocities, action[7:8]])
-            elif self._agent_type == "Jaco":
-                velocities = self._controller.get_control(**input_1)
+            elif self.robot_configs[idx]["agent_type"] == "Jaco":
+                velocities = self._controller[idx].get_control(**input_1)
                 low_action = np.concatenate([velocities] + [action[7:]] * 3)
-            elif self._agent_type == "Baxter":
+            elif self.robot_configs[idx]["agent_type"] == "Baxter":
                 input_2 = self._make_input(action[7:14], self._left_hand_quat)
-                velocities = self._controller.get_control(input_1, input_2)
+                velocities = self._controller[idx].get_control(input_1, input_2)
                 low_action = np.concatenate([velocities, action[14:16]])
             else:
                 raise Exception(
@@ -2986,7 +3063,10 @@ class FurnitureEnv(metaclass=EnvMeta):
                 )
 
             # keep trying to reach the target in a closed-loop
-            ctrl = self._setup_action(low_action)
+            unscaled_ctrl_list = [self._setup_action(low_action, idx=idx) for idx in range(self.num_robots)]
+            # TODO: integrate: ctrl should has dim 18
+            unscaled_ctrl = np.append([], unscaled_ctrl_list)
+            ctrl = self._setup_all_actions(unscaled_ctrl)
             for i in range(self._action_repeat):
                 self._do_simulation(ctrl)
                 if self._record_demo:
@@ -2997,21 +3077,24 @@ class FurnitureEnv(metaclass=EnvMeta):
                     )
 
                 if i + 1 < self._action_repeat:
-                    velocities = self._controller.get_control()
-                    if self._agent_type in ["Sawyer", "Panda", "Fetch"]:
+                    velocities = self._controller[idx].get_control()
+                    if self.robot_configs[idx]["agent_type"] in ["Sawyer", "Panda", "Fetch"]:
                         low_action = np.concatenate([velocities, action[7:]])
-                    elif self._agent_type == "Jaco":
+                    elif self.robot_configs[idx]["agent_type"] == "Jaco":
                         low_action = np.concatenate([velocities] + [action[7:]] * 3)
-                    elif self._agent_type == "Baxter":
+                    elif self.robot_configs[idx]["agent_type"] == "Baxter":
                         low_action = np.concatenate([velocities, action[14:]])
-                    ctrl = self._setup_action(low_action)
+                    unscaled_ctrl_list = [self._setup_action(low_action, idx=idx) for idx in range(self.num_robots)]
+                    # TODO: integrate: ctrl should has dim 18
+                    unscaled_ctrl = np.append([], unscaled_ctrl_list)
+                    ctrl = self._setup_all_actions(unscaled_ctrl)
 
         elif self._control_type == "ik_quaternion":
             arm_pos = {}
             arm_quat = {}
             gripper_action = {}
             last = 0
-            for arm in self._arms:
+            for arm in self.robot_configs[idx]["arms"]:
                 d_pos = action[last : last + 3] * self._move_speed
                 d_pos = [-d_pos[1], d_pos[0], d_pos[2]]
                 gripper_pos = self.sim.data.get_body_xpos("%s_hand" % arm)
@@ -3020,31 +3103,31 @@ class FurnitureEnv(metaclass=EnvMeta):
                 arm_quat[arm] = T.convert_quat(action[last + 3 : last + 7])
                 last += 7
 
-            for arm in self._arms:
+            for arm in self.robot_configs[idx]["arms"]:
                 gripper_action[arm] = [action[last]]
                 last += 1
 
             action_items = []
-            for arm in self._arms:
+            for arm in self.robot_configs[idx]["arms"]:
                 action_items.append(arm_pos[arm])
                 action_items.append(arm_quat[arm])
             action = np.hstack(action_items)
 
             action_items = []
-            for arm in self._arms:
+            for arm in self.robot_configs[idx]["arms"]:
                 action_items.append(gripper_action[arm])
             gripper_action = np.hstack(action_items)
 
             input_1 = self._make_input(action[:7], self._right_hand_quat)
-            if self._agent_type in ["Sawyer", "Panda", "Fetch"]:
-                velocities = self._controller.get_control(**input_1)
+            if self.robot_configs[idx]["agent_type"] in ["Sawyer", "Panda", "Fetch"]:
+                velocities = self._controller[idx].get_control(**input_1)
                 low_action = np.concatenate([velocities, gripper_action])
-            elif self._agent_type == "Jaco":
-                velocities = self._controller.get_control(**input_1)
+            elif self.robot_configs[idx]["agent_type"]== "Jaco":
+                velocities = self._controller[idx].get_control(**input_1)
                 low_action = np.concatenate([velocities] + [gripper_action] * 3)
-            elif self._agent_type == "Baxter":
+            elif self.robot_configs[idx]["agent_type"] == "Baxter":
                 input_2 = self._make_input(action[7:14], self._left_hand_quat)
-                velocities = self._controller.get_control(input_1, input_2)
+                velocities = self._controller[idx].get_control(input_1, input_2)
                 low_action = np.concatenate([velocities, gripper_action])
             else:
                 raise Exception(
@@ -3064,12 +3147,12 @@ class FurnitureEnv(metaclass=EnvMeta):
                     )
 
                 if i + 1 < self._action_repeat:
-                    velocities = self._controller.get_control()
-                    if self._agent_type in ["Sawyer", "Panda", "Fetch"]:
+                    velocities = self._controller[idx].get_control()
+                    if self.robot_configs[idx]["agent_type"] in ["Sawyer", "Panda", "Fetch"]:
                         low_action = np.concatenate([velocities, gripper_action])
-                    elif self._agent_type == "Jaco":
+                    elif self.robot_configs[idx]["agent_type"] == "Jaco":
                         low_action = np.concatenate([velocities] + [gripper_action] * 3)
-                    elif self._agent_type == "Baxter":
+                    elif self.robot_configs[idx]["agent_type"] == "Baxter":
                         low_action = np.concatenate([velocities, gripper_action])
                     ctrl = self._setup_action(low_action)
 
@@ -3327,7 +3410,8 @@ class FurnitureEnv(metaclass=EnvMeta):
         Returns a numpy array of joint positions.
         Sawyer robots have 7 joints and positions are in rotation angles.
         """
-        return self.sim.data.qpos[self._ref_joint_pos_indexes_all]
+        # TODO: return 14 all togehter or 7?
+        return self.sim.data.qpos[self._ref_joint_pos_indexes_all[self._controller_idx]]
 
     @property
     def _joint_velocities(self):
@@ -3335,28 +3419,30 @@ class FurnitureEnv(metaclass=EnvMeta):
         Returns a numpy array of joint velocities.
         Sawyer robots have 7 joints and velocities are angular velocities.
         """
-        return self.sim.data.qvel[self._ref_joint_vel_indexes_all]
+        # TODO: return 14 all togehter or 7?
+        return self.sim.data.qvel[self._ref_joint_vel_indexes_all[self._controller_idx]]
 
     def _robot_jpos_getter(self):
         return np.array(self._joint_positions)
 
-    def _setup_action(self, action):
+    def _setup_action(self, action, idx=0):
         if self._rescale_actions:
             action = np.clip(action, -1, 1)
 
-        arm_action = action[: self.mujoco_robot.dof]
-        if self._agent_type in ["Sawyer", "Panda", "Jaco", "Fetch"]:
+        # TODO: replace self.mujoco_robot
+        arm_action = action[: self.mujoco_robots[idx].dof]
+        if self.robot_configs[idx]["agent_type"] in ["Sawyer", "Panda", "Jaco", "Fetch"]:
             gripper_action_in = action[
-                self.mujoco_robot.dof : self.mujoco_robot.dof
-                + self.gripper["right"].dof
+                self.mujoco_robots[idx].dof : self.mujoco_robots[idx].dof
+                + self.grippers[idx]["right"].dof
             ]
-            gripper_action_actual = self.gripper["right"].format_action(
+            gripper_action_actual = self.grippers[idx]["right"].format_action(
                 gripper_action_in
             )
             action = np.concatenate([arm_action, gripper_action_actual])
 
-        elif self._agent_type == "Baxter":
-            last = self.mujoco_robot.dof  # Degrees of freedom in arm, i.e. 14
+        elif self.robot_configs[idx]["agent_type"] == "Baxter":
+            last = self.mujoco_robots[idx].dof  # Degrees of freedom in arm, i.e. 14
             gripper_right_action_in = action[last : last + self.gripper["right"].dof]
             last = last + self.gripper["right"].dof
             gripper_left_action_in = action[last : last + self.gripper["left"].dof]
@@ -3372,7 +3458,8 @@ class FurnitureEnv(metaclass=EnvMeta):
 
         if self._rescale_actions:
             # rescale normalized action to control ranges
-            ctrl_range = self.sim.model.actuator_ctrlrange
+            # TODO: each robot has 9 actuators
+            ctrl_range = self.sim.model.actuator_ctrlrange[0:9]
             bias = 0.5 * (ctrl_range[:, 1] + ctrl_range[:, 0])
             weight = 0.5 * (ctrl_range[:, 1] - ctrl_range[:, 0])
             applied_action = bias + weight * action
@@ -3381,12 +3468,33 @@ class FurnitureEnv(metaclass=EnvMeta):
 
         # gravity compensation
         self.sim.data.qfrc_applied[
-            self._ref_joint_vel_indexes_all
-        ] = self.sim.data.qfrc_bias[self._ref_joint_vel_indexes_all]
+            self._ref_joint_vel_indexes_all[idx]
+        ] = self.sim.data.qfrc_bias[self._ref_joint_vel_indexes_all[idx]]
         self.sim.data.qfrc_applied[
-            self._ref_gripper_joint_vel_indexes_all
-        ] = self.sim.data.qfrc_bias[self._ref_gripper_joint_vel_indexes_all]
+            self._ref_gripper_joint_vel_indexes_all[idx]
+        ] = self.sim.data.qfrc_bias[self._ref_gripper_joint_vel_indexes_all[idx]]
+        return action
 
+    def _setup_all_actions(self, all_actions):
+        '''
+        all_actions: action of each actuator
+        '''
+        if self._rescale_actions:
+            # rescale normalized action to control ranges
+            ctrl_range = self.sim.model.actuator_ctrlrange
+            bias = 0.5 * (ctrl_range[:, 1] + ctrl_range[:, 0])
+            weight = 0.5 * (ctrl_range[:, 1] - ctrl_range[:, 0])
+            applied_action = bias + weight * all_actions
+        else:
+            applied_action = all_actions
+
+        # # gravity compensation
+        # self.sim.data.qfrc_applied[
+        #     self._ref_joint_vel_indexes_all
+        # ] = self.sim.data.qfrc_bias[self._ref_joint_vel_indexes_all]
+        # self.sim.data.qfrc_applied[
+        #     self._ref_gripper_joint_vel_indexes_all
+        # ] = self.sim.data.qfrc_bias[self._ref_gripper_joint_vel_indexes_all]
         return applied_action
 
     def pose_in_base_from_name(self, name):
@@ -3399,8 +3507,8 @@ class FurnitureEnv(metaclass=EnvMeta):
         rot_in_world = self.sim.data.get_body_xmat(name).reshape((3, 3))
         pose_in_world = T.make_pose(pos_in_world, rot_in_world)
 
-        base_pos_in_world = self.sim.data.get_body_xpos("base")
-        base_rot_in_world = self.sim.data.get_body_xmat("base").reshape((3, 3))
+        base_pos_in_world = self.sim.data.get_body_xpos(self.mujoco_robots[self.idx].prefix + "base")
+        base_rot_in_world = self.sim.data.get_body_xmat(self.mujoco_robots[self.idx].prefix + "base").reshape((3, 3))
         base_pose_in_world = T.make_pose(base_pos_in_world, base_rot_in_world)
         world_pose_in_base = T.pose_inv(base_pose_in_world)
 
@@ -3420,7 +3528,7 @@ class FurnitureEnv(metaclass=EnvMeta):
         """
         Returns eef pose in base frame of robot.
         """
-        return self.pose_in_base_from_name("right_hand")
+        return self.pose_in_base_from_name(self.mujoco_robots[self.idx].prefix + "right_hand")
 
     @property
     def _right_hand_orn(self):

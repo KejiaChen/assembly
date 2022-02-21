@@ -22,6 +22,11 @@ from collections import OrderedDict
 
 import numpy as np
 
+import os
+
+# Print the current working directory
+print("Current working directory: {0}".format(os.getcwd()))
+
 from furniture.env.furniture_baxter import FurnitureBaxterEnv
 from furniture.env.models import furniture_names, background_names, agent_names, furniture_name2id
 import furniture.env.transform_utils as T
@@ -42,7 +47,7 @@ class FurnitureExampleEnv(FurnitureBaxterEnv):
         ###################################################
 
         # set the furniture to be always the simple blocks
-        config.furniture_id = furniture_name2id["block"]
+        config.furniture_id = furniture_name2id["chair_bernhard_0146"]
         # set subtask_ob for getting target object
         config.subtask_ob = True
         # set environment- and task-specific configurations
@@ -167,6 +172,7 @@ def main(args):
     # run one episode and collect transitions
     rollout = []
     done = False
+
     observation = env.reset()
     ep_length = 0
 

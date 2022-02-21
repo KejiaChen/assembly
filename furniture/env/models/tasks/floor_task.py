@@ -15,8 +15,8 @@ class FloorTask(Task):
     arena, and the objetcts into a single MJCF model.
     """
 
-    def __init__(self, mujoco_arena, mujoco_robot, mujoco_objects, \
-                mujoco_equality, furn_xyz_rand, furn_rot_rand, rng, init_qpos):
+    def __init__(self, mujoco_arena, mujoco_robots, mujoco_objects, \
+                mujoco_equality, mujoco_tendon, furn_xyz_rand, furn_rot_rand, rng, init_qpos):
         """
         Args:
             mujoco_arena: MJCF model of robot workspace
@@ -27,9 +27,12 @@ class FloorTask(Task):
         super().__init__()
 
         self.merge_arena(mujoco_arena)
-        self.merge_robot(mujoco_robot)
+        for mujoco_robot in mujoco_robots:
+            self.merge_robot(mujoco_robot)
+        # self.merge_robot(mujoco_robot)
         self.merge_objects(mujoco_objects)
         self.merge_equality(mujoco_equality)
+        self.merge_tendon(mujoco_tendon)
         initializer = UniformRandomSampler(rng,
            r_xyz=furn_xyz_rand, r_rot=furn_rot_rand, init_qpos=init_qpos)
 
@@ -44,6 +47,11 @@ class FloorTask(Task):
 
     def merge_robot(self, mujoco_robot):
         """Adds robot model to the MJCF model."""
+        # robots = list(robots) if type(robots) is list or type(robots) is tuple else [robots]
+        # self.robot = [None for _ in range(len(robots))]
+        # for idx, robot in enumerate(robots):
+        #     self.robot[idx] = robot
+        #     self.merge(robot)
         self.robot = mujoco_robot
         self.merge(mujoco_robot)
 
@@ -75,6 +83,11 @@ class FloorTask(Task):
         """Adds equality constraints  to the MJCF model."""
         for one_equality in equality:
             self.equality.append(one_equality)
+
+    def merge_tendon(self, tendon):
+        """Adds tendon constraints  to the MJCF model."""
+        for one_tendon in tendon:
+            self.tendon.append(one_tendon)
 
     def place_objects(self, fixed_parts=None):
         """Places objects randomly until no collisions or max iterations hit."""

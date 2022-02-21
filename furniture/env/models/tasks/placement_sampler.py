@@ -171,6 +171,8 @@ class UniformRandomSampler(ObjectPositionSampler):
                     po_y = qpos.y
                     if np.linalg.norm([obj_x - po_x, obj_y - po_y], 2) <= po_r + obj_r:
                         location_valid = False
+                        print("objname", obj_name)
+                        print("poame", po_name)
                         break
 
                 if location_valid:

@@ -3,10 +3,25 @@ import numpy as np
 from tqdm import tqdm
 import gym.spaces
 
+import os
+
+# Print the current working directory
+print("Current working directory: {0}".format(os.getcwd()))
+
+os.chdir('/home/kejia/Documents/assembly')
+
+# Print the current working directory
+print("Current working directory: {0}".format(os.getcwd()))
+
+# import sys
+# sys.path.append('/home/kejia/Documents/assembly')
+
+import furniture
+
 import furniture.env.transform_utils as T
-from .furniture_sawyer import FurnitureSawyerEnv
-from .furniture_sawyer_dense import FurnitureSawyerDenseRewardEnv
-from .models import background_names, furniture_name2id, furniture_xmls
+from furniture.env.furniture_sawyer import FurnitureSawyerEnv
+from furniture.env.furniture_sawyer_dense import FurnitureSawyerDenseRewardEnv
+from furniture.env.models import background_names, furniture_name2id, furniture_xmls
 from furniture.util.logger import logger
 
 

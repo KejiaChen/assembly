@@ -67,6 +67,12 @@ class FurniturePandaEnv(FurnitureEnv):
         """
         Takes a simulation step with @a and computes reward.
         """
+
+        # TODO: check from sawyer: discretize gripper action
+        # applied_action = a.copy()
+        # if self._discrete_grip:
+        #     applied_action[-2] = -1 if a[-2] < 0 else 1
+
         ob, _, done, _ = super()._step(a)
 
         reward, _done, info = self._compute_reward(a)
@@ -93,16 +99,17 @@ class FurniturePandaEnv(FurnitureEnv):
         self._target_body1 = self.sim.model.body_id2name(id1)
         self._target_body2 = self.sim.model.body_id2name(id2)
 
-    def _get_obs(self):
+    def _get_obs(self, include_qpos=False):
         """
         Returns the current observation.
         """
         state = super()._get_obs()
 
+        # TODO: include_qpos?
         # proprioceptive features
         if self._robot_ob:
             robot_states = OrderedDict()
-            if self._control_type in ["impedance", "torque"]:
+            if self._control_type in ["impedance", "torque"] or include_qpos:
                 robot_states["joint_pos"] = np.array(
                     [
                         self.sim.data.qpos[x]
@@ -224,6 +231,32 @@ class FurniturePandaEnv(FurnitureEnv):
         """
         return super()._compute_reward(ac)
 
+    # TODO: check from sawyer
+    def _finger_contact(self, obj):
+        """
+        Returns if left, right fingers contact with obj
+        """
+        touch_left_finger = False
+        touch_right_finger = False
+        for j in range(self.sim.data.ncon):
+            c = self.sim.data.contact[j]
+            body1 = self.sim.model.geom_bodyid[c.geom1]
+            body2 = self.sim.model.geom_bodyid[c.geom2]
+            body1_name = self.sim.model.body_id2name(body1)
+            body2_name = self.sim.model.body_id2name(body2)
+
+            if c.geom1 in self.l_finger_geom_ids["right"] and body2_name == obj:
+                touch_left_finger = True
+            if c.geom2 in self.l_finger_geom_ids["right"] and body1_name == obj:
+                touch_left_finger = True
+
+            if c.geom1 in self.r_finger_geom_ids["right"] and body2_name == obj:
+                touch_right_finger = True
+            if c.geom2 in self.r_finger_geom_ids["right"] and body1_name == obj:
+                touch_right_finger = True
+
+        return touch_left_finger, touch_right_finger
+
 
 def main():
     from ..config import create_parser
@@ -234,6 +267,9 @@ def main():
         "--run_mode", type=str, default="manual", choices=["manual", "vr", "demo"]
     )
     config, unparsed = parser.parse_known_args()
+    if len(unparsed):
+        logger.error("Unparsed argument is detected:\n%s", unparsed)
+        return
 
     # create an environment and run manual control of Panda environment
     env = FurniturePandaEnv(config)

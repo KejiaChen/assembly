@@ -5,10 +5,10 @@
 <!--        <numeric data="-0.37 0.21 0.01497 0.500129 0.500129 0.499871 0.499871" name="2_part2_initpos" />-->
 <!--        <numeric data="0.0   0.31 0.01497 0.5 -0.5 0.5 -0.5" name="3_part3_initpos" />-->
         <numeric data="0.1 0.27 0.051527 1 0 0 0" name="wire1_initpos" />
+        <numeric data="0.5 0.27 0.051527 0 0 0 1" name="wire2_initpos" />
 <!--        <numeric data="0.0 0.2 0.07 0.7073883 0 0.7068252 0" name="insertion_hole_1_initpos" />-->
         <!-- horizontal-->
         <numeric data="-0.1 0.2 0.029527 1 0 0 0" name="table1_initpos" />
-        0.1 -0.032 -0.06998405
         <!-- vertical-->
 <!--        <numeric data="-0.1 0.0 0.052527 0.7073883 -0.7068252 0 0" name="table1_initpos" />&ndash;&gt;-->
     </custom>
@@ -36,27 +36,60 @@
 
     <worldbody>
         <!--Wire-->
-        <body name="wire1" pos="0.1 0.27 0.051527" quat="0.7073883 0 -0.7068252 0">
+<!--        <body name="wire1" pos="0.0 0.0 0.051527" quat="0.7073883 0 -0.7068252 0">-->
 <!--        <body name="wire1" pos="0.1 -0.04005574 -0.06998405" quat="0.7073883 0 0 -0.7068252">-->
-<!--        <body name="wire1" pos="0 0.07 0.032" quat="1 0 0 0">&ndash;&gt;-->
+        <body name="wire1" pos="-0.2 0.2 0.351527" quat="1 0 0 0">-->
+<!--            <freejoint/>-->
 <!--            <include file="./rope_expanded_short.xml"/>-->
 <!--            <body xmlns:xi="http://www.w3.org/2001/XInclude">-->
 <!--            <xi:include href="source.xml" parse="xml" />-->
 <!--            </body>-->
-            <geom name="wire1_I1_geom" conaffinity="0" contype="0" density="0" pos="0 0 0" size="0.005 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" solref="0.001 1" type="capsule" />-->
-            <geom name="noviz_collision_wire1_I1" density="5" size="0.005 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
-            <geom name="wire1_G0_geom" conaffinity="0" contype="0" density="0"  pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />-->
-            <geom name="noviz_collision_wire1_G0" density="5" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+            <inertial pos="0.06 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+            <geom name="wire1_I1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.005 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" solref="0.001 1" type="capsule" />-->
+            <geom name="noviz_collision_wire1_I1"  size="0.005 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+            <geom name="wire1_G0_geom" conaffinity="0" contype="0" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />-->
+            <geom name="noviz_collision_wire1_G0" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
 <!--            <geom name="G0" pos="0.045 0 0" size="0.005 0.03" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0" />-->
+            <!--site for gripper-->
+            <site group="1" name="wire1_ltgt_site0" pos="0.075 0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
+            <site group="1" name="wire1_rtgt_site0" pos="0.075 -0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
+            <!--site for hole-->
+            <site group="0" name="wire-hole,0,90,180,270,conn_site1" pos="-0.0125 0.0 0.0" quat="0.707107 0 0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />
+            <!-- <site name="wire1_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="1 1 0 1" size="0.0035" />-->
+            <!--site for connection-->
+            <site group="1" name="wire1_end" pos="0.125 0 0" quat="0.707107 0 -0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
+            <site name="wire1_horizontal_radius_site" pos="0.065 0 0" rgba="0 0 0 0" size="0.0055" />
+<!--            <body name="composite_B1" pos="0.12 0 0">-->
+<!--&lt;!&ndash;                <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;-->
+<!--&lt;!&ndash;                        <joint name="J0_1" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                        <joint name="J1_1" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
+<!--&lt;!&ndash;                        <geom name="G1" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <site name="B1_horizontal_radius_site" pos="0 0 0" rgba="1 1 0 1" size="0.0055" />&ndash;&gt;-->
+
+<!--                <inertial pos="0.055 0 0" quat="0.707107 0 0.707107 0" mass="0.0001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />-->
+<!--                <joint name="J0_1" pos="-0.0175 0 0" axis="0 1 0" damping="0.005" />-->
+<!--                <joint name="J1_1" pos="-0.0175 0 0" axis="0 0 1" damping="0.005" />-->
+<!--                <geom name="B1_G1_geom" conaffinity="0" contype="0" pos="0.055 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />&ndash;&gt;-->
+<!--                <geom name="noviz_collision_B1_G1" pos="0.055 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>-->
+<!--&lt;!&ndash;                <geom name="G1" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
+<!--                <site name="B1_horizontal_radius_site" pos="0 0 0" rgba="1 1 0 1" size="0.0055" />-->
+<!--                <body name="composite_B2" pos="0.1 0 0">-->
+<!--                    <inertial pos="0.055 0 0" quat="0.707107 0 0.707107 0" mass="0.0001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />-->
+<!--                    <joint name="J0_2" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />-->
+<!--                    <joint name="J1_2" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />-->
+<!--                    <geom name="B2_G2_geom" conaffinity="0" contype="0" pos="0.055 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />&ndash;&gt;-->
+<!--                    <geom name="noviz_collision_B2_G2" pos="0.055 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>-->
+<!--                </body>-->
+<!--            </body>-->
 
 <!--                <body name="B0" pos="0.0 0.0 0.0">-->
 <!--&lt;!&ndash;                <geom name="I1 visual" conaffinity="0" contype="0" density="0"  pos="0 0 0" size="0.0025 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" solref="0.001 1" type="capsule" />&ndash;&gt;-->
 <!--                    <geom name="I1_collision" size="0.0025 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.7 0.7 1" group="0" solref="0.001 1"/>-->
-<!--&lt;!&ndash;                <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;-->
+<!--                    <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />-->
 <!--                    <geom name="G0" pos="0.03 0 0" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0" />-->
 <!--                    <site name="B0_horizontal_radius_site" pos="0.03 0 0" rgba="1 1 0 1" size="0.0055" />-->
 <!--                    <body name="B1" pos="0.06 0 0">-->
-<!--&lt;!&ndash;                <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;-->
+<!--                        <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />-->
 <!--                        <joint name="J0_1" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />-->
 <!--                        <joint name="J1_1" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />-->
 <!--                        <geom name="G1" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>-->
@@ -120,13 +153,23 @@
 <!--                        </body>-->
 <!--                    </body>-->
 <!--            </body>-->
+        </body>
+
+        <body name="wire2" pos="0.2 0.2 0.051527" quat="0 0 0 1">
+            <geom name="wire2_I2_geom" conaffinity="0" contype="0" density="0" pos="0 0 0" size="0.005 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" solref="0.001 1" type="capsule" />-->
+            <geom name="noviz_collision_wire2_I2" density="5" size="0.005 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+            <geom name="wire2_G0_geom" conaffinity="0" contype="0" density="0"  pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />-->
+            <geom name="noviz_collision_wire2_G0" density="5" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+            <geom name="wire2_G0" pos="0.045 0 0" size="0.005 0.03" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0" />
             <!--site for gripper-->
-            <site group="1" name="wire1_ltgt_site0" pos="0.065 0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
-            <site group="1" name="wire1_rtgt_site0" pos="0.065 -0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
+            <site group="1" name="wire2_ltgt_site0" pos="0.075 0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
+            <site group="1" name="wire2_rtgt_site0" pos="0.075 -0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
             <!--site for hole-->
-            <site group="0" name="wire-hole,0,90,180,270,conn_site1" pos="-0.0125 0.0 0.0" quat="0.707107 0 0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />
-<!--            <site name="wire1_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="1 1 0 1" size="0.0035" />-->
-            <site name="wire1_horizontal_radius_site" pos="0.065 0 0" rgba="0 0 0 0" size="0.0055" />
+<!--            <site group="0" name="wire-hole,0,90,180,270,conn_site1" pos="-0.0125 0.0 0.0" quat="0.707107 0 0.707107 0" rgba="0 0 0 0" size="0.005" />-->
+            <!--site for connection-->
+            <site group="1" name="wire2_end" pos="0.125 0 0" quat="0.707107 0 0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
+            <site name="wire2_horizontal_radius_site" pos="0.065 0 0" rgba="0 0 0 0" size="0.0055" />
+<!--            <joint type="free"/>-->
         </body>
 
         <!-- Table -->
@@ -146,19 +189,22 @@
             <site name="table1_top_site" pos="0.0 0.0 0.02" rgba="0 0 0 0" size="0.0066" />
 <!--            <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.1 -0.07 0.02" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />-->
             <site name="table1_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="0 0 0 0" size="0.18" />
+            <!--Platform-->
+            <geom conaffinity="0" contype="0" density="0" material="pencil-wood" size="0.03 0.00825 0.00825" name="plat1_geom" pos="0.1 -0.07 0.05" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_plat1" pos="0.1 -0.07 0.05" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.03 0.00825 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
             <!--Hole-->
-            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016  0.00825" name="hole1_1_geom" pos="0.1 -0.07665  0.032" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_hole1_1" pos="0.1 -0.07665  0.032" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.0016  0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
-            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_2_geom" pos="0.09335 -0.07 0.032" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_hole1_2" pos="0.09335 -0.07 0.032" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
-            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_3_geom" pos="0.10665 -0.07 0.032" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_hole1_3" pos="0.10665 -0.07 0.032" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
-            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016 0.00825" name="hole1_4_geom" pos="0.1 -0.06335 0.032" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_hole1_4" pos="0.1 -0.06335 0.032" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.0016 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
-            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.0021 0.00825 0.00825" name="hole1_5_geom" pos="0.1 -0.07 0.022" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_hole1_5" pos="0.1 -0.07 0.022" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.0021 0.00825 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
-            <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.1 -0.07 0.024" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />
-            <site name="insertion_hole_1_horizontal_radius_site" pos="0.1 -0.07 0.032" rgba="0 0 0 0" size="0.012" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016  0.00825" name="hole1_1_geom" pos="0.1 -0.07665  0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_1" pos="0.1 -0.07665  0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.0016  0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_2_geom" pos="0.09335 -0.07 0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_2" pos="0.09335 -0.07 0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_3_geom" pos="0.10665 -0.07 0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_3" pos="0.10665 -0.07 0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016 0.00825" name="hole1_4_geom" pos="0.1 -0.06335 0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_4" pos="0.1 -0.06335 0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.0016 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.0021 0.00825 0.00825" name="hole1_5_geom" pos="0.1 -0.07 0.082" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_5" pos="0.1 -0.07 0.082" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.0021 0.00825 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.1 -0.07 0.084" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />
+            <site name="insertion_hole_1_horizontal_radius_site" pos="0.1 -0.07 0.092" rgba="0 0 0 0" size="0.012" />
         </body>
 
         <!--Hole-->
@@ -241,6 +287,13 @@
 <!--        </body>-->
 
     </worldbody>
+    <tendon>
+<!--        <spatial limited="true" range="0 0.2" width="0.01" rgba="0.1 0.1 0.1 1">-->
+        <spatial limited="true" range="0 0.2" width="0.01" rgba="0.1 0.1 0.1 1">
+            <site site="wire1_end"/>
+            <site site="wire2_end"/>
+        </spatial>
+    </tendon>
 
 <!--    <include file='assets/actuator0.xml'/>-->
 <!--    <include file='assets/actuator1.xml'/>-->

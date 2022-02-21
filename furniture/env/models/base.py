@@ -39,6 +39,7 @@ class MujocoXML(object):
         self.folder = os.path.dirname(fname)
         self.tree = ET.parse(fname)
         self.root = self.tree.getroot()
+        # self.idn = idn
         self.name = self.root.get("model")
         self.worldbody = self.create_default_element("worldbody")
         self.actuator = self.create_default_element("actuator")
@@ -47,6 +48,7 @@ class MujocoXML(object):
         self.sensor = self.create_default_element("sensor")
         self.contact = self.create_default_element("contact")
         self.default = self.create_default_element("default")
+        self.tendon = self.create_default_element("tendon")
         self.resolve_asset_dependency()
         self.debug = debug
 
@@ -97,8 +99,10 @@ class MujocoXML(object):
             self.sensor.append(one_sensor)
         for one_contact in other.contact:
             self.contact.append(one_contact)
-        for one_default in other.default:
-            self.default.append(one_default)
+        # for one_default in other.default:
+        #     self.default.append(one_default)
+        for one_tendon in other.tendon:
+            self.tendon.append(one_tendon)
         # self.config.append(other.config)
 
     def get_model(self, mode="mujoco_py"):
@@ -163,6 +167,17 @@ class MujocoXML(object):
         for child in self.root.iter("body"):
             if self.debug:
                 print('\t', child.tag, child.get('name'))
-            names.append(child.get('name'))
+            child_name = child.get('name')
+            if not child_name.startswith("composite"):
+                names.append(child.get('name'))
+            else:
+                print('\t\t omitted', )
         return names
 
+    # @property
+    # def name(self):
+    #     return "{}{}".format(type(self).__name__, self.idn)
+    #
+    # @property
+    # def naming_prefix(self):
+    #     return "{}_".format(self.idn)

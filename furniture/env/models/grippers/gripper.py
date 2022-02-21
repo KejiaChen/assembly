@@ -2,13 +2,19 @@
 Defines the base class of all grippers
 """
 from ..base import MujocoXML
+from ....env.mjcf_utils import add_prefix
 
 
 class Gripper(MujocoXML):
     """Base class for grippers"""
 
-    def __init__(self, fname):
+    def __init__(self, fname, idn=0):
         super().__init__(fname)
+        self.idn = idn
+        self.name = self.name + str(self.idn)
+        self.prefix = self.name + "_"
+
+        add_prefix(root=self.root, prefix=self.prefix, exclude=None)
 
     def format_action(self, action):
         """

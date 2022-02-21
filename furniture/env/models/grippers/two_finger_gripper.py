@@ -12,8 +12,9 @@ class TwoFingerGripperBase(Gripper):
     Gripper with two fingers.
     """
 
-    def __init__(self):
-        super().__init__(xml_path_completion("grippers/two_finger_gripper.xml"))
+    def __init__(self, idn=0):
+        super().__init__(xml_path_completion("grippers/two_finger_gripper.xml"), idn)
+        print(self.joints)
 
     def format_action(self, action):
         return action
@@ -24,11 +25,13 @@ class TwoFingerGripperBase(Gripper):
 
     @property
     def joints(self):
-        return ["r_gripper_l_finger_joint", "r_gripper_r_finger_joint"]
+        return [self.prefix + "r_gripper_l_finger_joint",
+                self.prefix + "r_gripper_r_finger_joint"]
 
     @property
     def sensors(self):
-        return ["force_ee", "torque_ee"]
+        return [self.prefix + "force_ee",
+                self.prefix + "torque_ee"]
 
     @property
     def dof(self):
@@ -36,27 +39,32 @@ class TwoFingerGripperBase(Gripper):
 
     @property
     def visualization_sites(self):
-        return ["grip_site", "grip_site_cylinder"]
+        return [self.prefix + "grip_site",
+                self.prefix + "grip_site_cylinder"]
 
     @property
     def contact_geoms(self):
         return [
-            "r_finger_g0",
-            "r_finger_g1",
-            "l_finger_g0",
-            "l_finger_g1",
-            "r_fingertip_g0",
-            "l_fingertip_g0",
-            "right_gripper_base_collision",
+            self.prefix + "r_finger_g0",
+            self.prefix + "r_finger_g1",
+            self.prefix + "l_finger_g0",
+            self.prefix + "l_finger_g1",
+            self.prefix + "r_fingertip_g0",
+            self.prefix + "l_fingertip_g0",
+            self.prefix + "right_gripper_base_collision",
         ]
 
     @property
     def left_finger_geoms(self):
-        return ["l_finger_g0", "l_finger_g1", "l_fingertip_g0"]
+        return [self.prefix + "l_finger_g0",
+                self.prefix + "l_finger_g1",
+                self.prefix + "l_fingertip_g0"]
 
     @property
     def right_finger_geoms(self):
-        return ["r_finger_g0", "r_finger_g1", "r_fingertip_g0"]
+        return [self.prefix + "r_finger_g0",
+                self.prefix + "r_finger_g1",
+                self.prefix + "r_fingertip_g0"]
 
 
 class TwoFingerGripper(TwoFingerGripperBase):

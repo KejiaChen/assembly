@@ -59,7 +59,14 @@ If you are on a headless server, make sure you run a [virtual display](docs/inst
 You can use WASDQE keys for moving and IJKLUO keys for rotating an end-effector of an agent. SPACE and ENTER are closing and opening the gripper, respectively. C key will connect two aligned parts.
 
 ```bash
+# in root assembly folder
 python -m furniture.demo_manual
+```
+
+An example for RL training:
+```
+# in root assembly folder
+python -m furniture.demo_rl
 ```
 
 ## (2) Gym interface
