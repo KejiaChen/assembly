@@ -5,7 +5,7 @@
 <!--        <numeric data="-0.37 0.21 0.01497 0.500129 0.500129 0.499871 0.499871" name="2_part2_initpos" />-->
 <!--        <numeric data="0.0   0.31 0.01497 0.5 -0.5 0.5 -0.5" name="3_part3_initpos" />-->
         <numeric data="0.1 0.27 0.051527 1 0 0 0" name="wire1_initpos" />
-        <numeric data="0.5 0.27 0.051527 0 0 0 1" name="wire2_initpos" />
+<!--        <numeric data="0.6 0.27 0.051527 0 0 0 1" name="wire2_initpos" />-->
 <!--        <numeric data="0.0 0.2 0.07 0.7073883 0 0.7068252 0" name="insertion_hole_1_initpos" />-->
         <!-- horizontal-->
         <numeric data="-0.1 0.2 0.029527 1 0 0 0" name="table1_initpos" />
@@ -24,6 +24,8 @@
         <mesh file="table_lack_0825/table.stl" name="part4" scale="0.015 0.015 0.02" />
         <texture file="../textures/light-wood.png" name="tex-light-wood" type="2d" />
         <material name="pencil-wood" reflectance="0.5" texrepeat="20 20" texture="tex-light-wood" texuniform="true" />
+        <texture file="../textures/red-wood.png" name="tex-red-wood" type="2d" />
+        <material name="red-wood" reflectance="0.5" texrepeat="20 20" texture="tex-red-wood" texuniform="true" />
     </asset>
 
     <equality>
@@ -44,10 +46,10 @@
 <!--            <body xmlns:xi="http://www.w3.org/2001/XInclude">-->
 <!--            <xi:include href="source.xml" parse="xml" />-->
 <!--            </body>-->
-            <inertial pos="0.06 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
-            <geom name="wire1_I1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.005 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" solref="0.001 1" type="capsule" />-->
+            <inertial pos="0.055 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+            <geom name="wire1_I1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.005 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
             <geom name="noviz_collision_wire1_I1"  size="0.005 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
-            <geom name="wire1_G0_geom" conaffinity="0" contype="0" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />-->
+            <geom name="wire1_G0_geom" conaffinity="0" contype="0" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" group="1" solref="0.001 1" type="capsule" />-->
             <geom name="noviz_collision_wire1_G0" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
 <!--            <geom name="G0" pos="0.045 0 0" size="0.005 0.03" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0" />-->
             <!--site for gripper-->
@@ -59,124 +61,125 @@
             <!--site for connection-->
             <site group="1" name="wire1_end" pos="0.125 0 0" quat="0.707107 0 -0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
             <site name="wire1_horizontal_radius_site" pos="0.065 0 0" rgba="0 0 0 0" size="0.0055" />
-<!--            <body name="composite_B1" pos="0.12 0 0">-->
-<!--&lt;!&ndash;                <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;-->
-<!--&lt;!&ndash;                        <joint name="J0_1" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                        <joint name="J1_1" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                        <geom name="G1" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                        <site name="B1_horizontal_radius_site" pos="0 0 0" rgba="1 1 0 1" size="0.0055" />&ndash;&gt;-->
-
-<!--                <inertial pos="0.055 0 0" quat="0.707107 0 0.707107 0" mass="0.0001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />-->
-<!--                <joint name="J0_1" pos="-0.0175 0 0" axis="0 1 0" damping="0.005" />-->
-<!--                <joint name="J1_1" pos="-0.0175 0 0" axis="0 0 1" damping="0.005" />-->
-<!--                <geom name="B1_G1_geom" conaffinity="0" contype="0" pos="0.055 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />&ndash;&gt;-->
-<!--                <geom name="noviz_collision_B1_G1" pos="0.055 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>-->
-<!--&lt;!&ndash;                <geom name="G1" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--                <site name="B1_horizontal_radius_site" pos="0 0 0" rgba="1 1 0 1" size="0.0055" />-->
-<!--                <body name="composite_B2" pos="0.1 0 0">-->
-<!--                    <inertial pos="0.055 0 0" quat="0.707107 0 0.707107 0" mass="0.0001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />-->
-<!--                    <joint name="J0_2" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />-->
-<!--                    <joint name="J1_2" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />-->
-<!--                    <geom name="B2_G2_geom" conaffinity="0" contype="0" pos="0.055 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />&ndash;&gt;-->
-<!--                    <geom name="noviz_collision_B2_G2" pos="0.055 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>-->
-<!--                </body>-->
-<!--            </body>-->
-
-<!--                <body name="B0" pos="0.0 0.0 0.0">-->
-<!--&lt;!&ndash;                <geom name="I1 visual" conaffinity="0" contype="0" density="0"  pos="0 0 0" size="0.0025 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" solref="0.001 1" type="capsule" />&ndash;&gt;-->
-<!--                    <geom name="I1_collision" size="0.0025 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.7 0.7 1" group="0" solref="0.001 1"/>-->
-<!--                    <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />-->
-<!--                    <geom name="G0" pos="0.03 0 0" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0" />-->
-<!--                    <site name="B0_horizontal_radius_site" pos="0.03 0 0" rgba="1 1 0 1" size="0.0055" />-->
-<!--                    <body name="B1" pos="0.06 0 0">-->
-<!--                        <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />-->
+            <body name="composite_B1" pos="0.14 0 0">
+<!--                <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />-->
 <!--                        <joint name="J0_1" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />-->
 <!--                        <joint name="J1_1" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />-->
 <!--                        <geom name="G1" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>-->
 <!--                        <site name="B1_horizontal_radius_site" pos="0 0 0" rgba="1 1 0 1" size="0.0055" />-->
-<!--                        <body name="B2" pos="0.035 0 0">-->
-<!--&lt;!&ndash;                        <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;-->
-<!--                            <joint name="J0_2" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />-->
-<!--                            <joint name="J1_2" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />-->
-<!--                            <geom name="G2" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>-->
-<!--                            <site name="B2_horizontal_radius_site" pos="0 0 0" rgba="1 1 0 1" size="0.0055" />-->
-<!--&lt;!&ndash;                            <body name="B3" pos="0.035 0 0">&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                        <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                                <joint name="J0_3" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                <joint name="J1_3" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                <geom name="G3" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                                <body name="B4" pos="0.035 0 0">&ndash;&gt;-->
-<!--&lt;!&ndash;                                    <joint name="J0_4" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                    <joint name="J1_4" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                    <geom name="G4" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                                    <body name="B5" pos="0.035 0 0">&ndash;&gt;-->
-<!--&lt;!&ndash;                                        <joint name="J0_5" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                        <joint name="J1_5" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                        <geom name="G5" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                                        <body name="B6" pos="0.035 0 0">&ndash;&gt;-->
-<!--&lt;!&ndash;                                            <joint name="J0_6" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                            <joint name="J1_6" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                            <geom name="G6" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                                            <body name="B7" pos="0.035 0 0">&ndash;&gt;-->
-<!--&lt;!&ndash;                                                <joint name="J0_7" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                                <joint name="J1_7" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                                <geom name="G7" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                <body name="B8" pos="0.035 0 0">&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    <joint name="J0_8" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    <joint name="J1_8" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    <geom name="G8" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    <body name="B9" pos="0.035 0 0">&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                                                    <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                                                        <joint name="J0_9" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                                        <joint name="J1_9" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                                        <geom name="G9" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                        <body name="B10" pos="0.035 0 0">&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                                                    <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                                                            <joint name="J0_10" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                                            <joint name="J1_10" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                                            <geom name="G10" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                            <body name="B11" pos="0.035 0 0">&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                                                        <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                                                                <joint name="J0_11" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                                                <joint name="J1_11" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />&ndash;&gt;-->
-<!--&lt;!&ndash;                                                                <geom name="G11" size="0.005 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                                <geom pos="0.03 0 0" name="I2" size="0.0025 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.7 0.7 1" group="0"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                            </body>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                        </body>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    </body>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                </body>&ndash;&gt;-->
-<!--&lt;!&ndash;                                            </body>&ndash;&gt;-->
-<!--&lt;!&ndash;                                        </body>&ndash;&gt;-->
-<!--&lt;!&ndash;                                    </body>&ndash;&gt;-->
-<!--&lt;!&ndash;                                </body>&ndash;&gt;-->
-<!--&lt;!&ndash;                            </body>&ndash;&gt;-->
-<!--                        </body>-->
-<!--                    </body>-->
-<!--            </body>-->
+                <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                <joint name="J0_1" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005"/>
+                <joint name="J1_1" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005"/>
+                <geom name="B1_G1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" rgba="0.7 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                <geom name="noviz_collision_B1_G1" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+<!--                <geom name="G1" size="0.01 0.015" quat="0.707107 0 0.707107 0" typ e="capsule" rgba="0.1 0.1 0.1 1" group="0"/>-->
+                <site name="B1_horizontal_radius_site" pos="0 0 0" rgba="1 1 0 1" size="0.0055" />
+                <body name="composite_B2" pos="0.035 0 0">
+                    <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                    <joint name="J0_2" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />
+                    <joint name="J1_2" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />
+                    <geom name="B2_G1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" rgba="0.7 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                    <geom name="noviz_collision_B2_G1" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+                    <body name="composite_B3" pos="0.035 0 0">
+                        <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                        <joint name="J0_3" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />
+                        <joint name="J1_3" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />
+                        <geom name="B3_G1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" rgba="0.7 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                        <geom name="noviz_collision_B3_G1" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+                        <body name="composite_B4" pos="0.035 0 0">
+                            <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                            <joint name="J0_4" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />
+                            <joint name="J1_4" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />
+                            <geom name="B4_G1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" rgba="0.7 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                            <geom name="noviz_collision_B4_G1" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+                            <body name="composite_B5" pos="0.035 0 0">
+                                <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                                <joint name="J0_5" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />
+                                <joint name="J1_5" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />
+                                <geom name="B5_G1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" rgba="0.7 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                                <geom name="noviz_collision_B5_G1" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+                                <body name="composite_B6" pos="0.035 0 0">
+                                    <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                                    <joint name="J0_6" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />
+                                    <joint name="J1_6" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />
+                                    <geom name="B6_G1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" rgba="0.7 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                                    <geom name="noviz_collision_B6_G1" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+                                    <body name="composite_B7" pos="0.035 0 0">
+                                        <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                                        <joint name="J0_7" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />
+                                        <joint name="J1_7" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />
+                                        <geom name="B7_G1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" rgba="0.7 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                                        <geom name="noviz_collision_B7_G1" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+                                        <body name="composite_B8" pos="0.035 0 0">
+                                            <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                                            <joint name="J0_8" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />
+                                            <joint name="J1_8" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />
+                                            <geom name="B8_G1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" rgba="0.7 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                                            <geom name="noviz_collision_B8_G1" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+                                            <body name="composite_B9" pos="0.035 0 0">
+                                                <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                                                <joint name="J0_9" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />
+                                                <joint name="J1_9" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />
+                                                <geom name="B9_G1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" rgba="0.7 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                                                <geom name="noviz_collision_B9_G1" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+                                                <body name="composite_B10" pos="0.035 0 0">
+                                                    <inertial pos="0 0 0" quat="0.707107 0 0.707107 0" mass="0.00001" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                                                    <joint name="J0_10" pos="-0.0175 0 0" axis="0 1 0" group="3" damping="0.005" />
+                                                    <joint name="J1_10" pos="-0.0175 0 0" axis="0 0 1" group="3" damping="0.005" />
+                                                    <geom name="B10_G1_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" rgba="0.7 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                                                    <geom name="noviz_collision_B10_G1" pos="0 0 0" size="0.01 0.015" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+                                                    <body name="composite_wire2" pos="0.015 0 0">
+                                                        <inertial pos="0.055 0 0" quat="0.707107 0 0.707107 0" mass="0.000274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />
+                                                        <geom name="wire2_G0_geom" conaffinity="0" contype="0" pos="0.055 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" group="1" solref="0.001 1" type="capsule" />-->
+                                                        <geom name="noviz_collision_wire2_G0" pos="0.055 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+                                                        <geom name="wire2_I2_geom" conaffinity="0" contype="0" pos="0.115 0 0" size="0.005 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" group="1" solref="0.001 1" type="capsule" />-->
+                                                        <geom name="noviz_collision_wire2_I2" pos="0.115 0 0" size="0.005 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+<!--                                                        <geom name="wire2_G0" pos="0.045 0 0" size="0.005 0.03" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0" />-->
+                                                        <!--site for gripper-->
+                                                        <site group="1" name="wire2_ltgt_site0" pos="0.055 0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
+                                                        <site group="1" name="wire2_rtgt_site0" pos="0.055 -0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
+                                                        <!--site for hole-->
+<!--                                                        <site group="0" name="wire2-hole,0,90,180,270,conn_site2" pos="0.125 0.0 0.0" quat="0.707107 0 0.707107 0" rgba="0 0 0 0" size="0.005" />-->
+                                                        <!--site for connection-->
+<!--                                                        <site group="1" name="wire2_end" pos="0.125 0 0" quat="0 0 1 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />-->
+                                                        <site name="wire2_horizontal_radius_site" pos="0.055 0 0" rgba="0 0 0 0" size="0.0055" />
+<!--                                                                    <joint type="free"/>-->
+                                                    </body>
+                                                </body>
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
         </body>
 
-        <body name="wire2" pos="0.2 0.2 0.051527" quat="0 0 0 1">
-            <geom name="wire2_I2_geom" conaffinity="0" contype="0" density="0" pos="0 0 0" size="0.005 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" solref="0.001 1" type="capsule" />-->
-            <geom name="noviz_collision_wire2_I2" density="5" size="0.005 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
-            <geom name="wire2_G0_geom" conaffinity="0" contype="0" density="0"  pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />-->
-            <geom name="noviz_collision_wire2_G0" density="5" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
-            <geom name="wire2_G0" pos="0.045 0 0" size="0.005 0.03" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0" />
-            <!--site for gripper-->
-            <site group="1" name="wire2_ltgt_site0" pos="0.075 0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
-            <site group="1" name="wire2_rtgt_site0" pos="0.075 -0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
-            <!--site for hole-->
-<!--            <site group="0" name="wire-hole,0,90,180,270,conn_site1" pos="-0.0125 0.0 0.0" quat="0.707107 0 0.707107 0" rgba="0 0 0 0" size="0.005" />-->
-            <!--site for connection-->
-            <site group="1" name="wire2_end" pos="0.125 0 0" quat="0.707107 0 0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />
-            <site name="wire2_horizontal_radius_site" pos="0.065 0 0" rgba="0 0 0 0" size="0.0055" />
-<!--            <joint type="free"/>-->
-        </body>
+<!--        <body name="wire2" pos="0.2 0.2 0.051527" quat="0 0 0 1">-->
+<!--            <inertial pos="0.055 0 0" quat="0.707107 0 0.707107 0" mass="0.000274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08" />-->
+<!--            <geom name="wire2_I2_geom" conaffinity="0" contype="0" pos="0 0 0" size="0.005 0.01" quat="0.707107 0 0.707107 0" rgba="0.1 0.7 0.7 1" solref="0.001 1" type="capsule" />&ndash;&gt;-->
+<!--            <geom name="noviz_collision_wire2_I2"  size="0.005 0.01" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>-->
+<!--            <geom name="wire2_G0_geom" conaffinity="0" contype="0" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" rgba="0.1 0.1 0.1 1" solref="0.001 1" type="capsule" />&ndash;&gt;-->
+<!--            <geom name="noviz_collision_wire2_G0" pos="0.065 0 0" size="0.01 0.05" quat="0.707107 0 0.707107 0" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>-->
+<!--            <geom name="wire2_G0" pos="0.045 0 0" size="0.005 0.03" quat="0.707107 0 0.707107 0" type="capsule" rgba="0.1 0.1 0.1 1" group="0" />-->
+<!--            &lt;!&ndash;site for gripper&ndash;&gt;-->
+<!--            <site group="1" name="wire2_ltgt_site0" pos="0.075 0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />-->
+<!--            <site group="1" name="wire2_rtgt_site0" pos="0.075 -0.01 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />-->
+<!--            &lt;!&ndash;site for hole&ndash;&gt;-->
+<!--&lt;!&ndash;            <site group="0" name="wire-hole,0,90,180,270,conn_site1" pos="-0.0125 0.0 0.0" quat="0.707107 0 0.707107 0" rgba="0 0 0 0" size="0.005" />&ndash;&gt;-->
+<!--            &lt;!&ndash;site for connection&ndash;&gt;-->
+<!--            <site group="1" name="wire2_end" pos="0.125 0 0" quat="0.707107 0 0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" />-->
+<!--            <site name="wire2_horizontal_radius_site" pos="0.065 0 0" rgba="0 0 0 0" size="0.0055" />-->
+<!--&lt;!&ndash;            <joint type="free"/>&ndash;&gt;-->
+<!--        </body>-->
 
         <!-- Table -->
         <body name="table1" pos="0 0 0" quat="1 0 0 0">
 <!--        <body name="table1" pos="0.0 0.0 0.0" quat="0.7073883 0.7068252 0 0">-->
-            <geom conaffinity="0" contype="0" density="0" material="pencil-wood" mesh="part4" name="table1_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
-            <geom density="50" name="noviz_collision_table1_0" pos="0 0 0" quat="1 0 0 0" rgba="0 0 0 0" size="0.32 0.12 0.02" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="pencil-wood" mesh="part4" name="table1_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" group="1" solref="0.001 1" type="mesh" />
+            <geom density="50" name="noviz_collision_table1_0" pos="0 0 0" quat="1 0 0 0" rgba="0 0 0 0" group="0" size="0.32 0.12 0.02" solref="0.001 1" type="box" />
             <site name="table1_corner_site1" pos="-0.385 -0.140 -0.023" rgba="0 0 0 0" size="0.005" />
             <site name="table1_corner_site2" pos="-0.385 0.140 -0.023" rgba="0 0 0 0" size="0.005" />
             <site name="table1_corner_site3" pos="0.385 -0.140 -0.023" rgba="0 0 0 0" size="0.005" />
@@ -190,19 +193,19 @@
 <!--            <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.1 -0.07 0.02" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />-->
             <site name="table1_horizontal_radius_site" pos="0.0 0.0 0.0" rgba="0 0 0 0" size="0.18" />
             <!--Platform-->
-            <geom conaffinity="0" contype="0" density="0" material="pencil-wood" size="0.03 0.00825 0.00825" name="plat1_geom" pos="0.1 -0.07 0.05" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_plat1" pos="0.1 -0.07 0.05" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.03 0.00825 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="pencil-wood" size="0.03 0.00825 0.00825" name="plat1_geom" group="1" pos="0.1 -0.07 0.05" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_plat1" group="0" pos="0.1 -0.07 0.05" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.03 0.00825 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
             <!--Hole-->
-            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016  0.00825" name="hole1_1_geom" pos="0.1 -0.07665  0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_hole1_1" pos="0.1 -0.07665  0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.0016  0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
-            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_2_geom" pos="0.09335 -0.07 0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_hole1_2" pos="0.09335 -0.07 0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
-            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_3_geom" pos="0.10665 -0.07 0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_hole1_3" pos="0.10665 -0.07 0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
-            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016 0.00825" name="hole1_4_geom" pos="0.1 -0.06335 0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_hole1_4" pos="0.1 -0.06335 0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.0016 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
-            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.0021 0.00825 0.00825" name="hole1_5_geom" pos="0.1 -0.07 0.082" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
-            <geom density="100" name="noviz_collision_hole1_5" pos="0.1 -0.07 0.082" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.0021 0.00825 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016  0.00825" name="hole1_1_geom" group="1" pos="0.1 -0.07665  0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_1" group="0" pos="0.1 -0.07665  0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.0016  0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_2_geom" group="1" pos="0.09335 -0.07 0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_2" group="0" pos="0.09335 -0.07 0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.00625 0.0016" name="hole1_3_geom" group="1" pos="0.10665 -0.07 0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_3" group="0" pos="0.10665 -0.07 0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.00625 0.0016" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.01 0.0016 0.00825" name="hole1_4_geom" group="1" pos="0.1 -0.06335 0.092" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_4" group="0" pos="0.1 -0.06335 0.092" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.01 0.0016 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
+            <geom conaffinity="0" contype="0" density="0" material="smetal" size="0.0021 0.00825 0.00825" name="hole1_5_geom" group="1" pos="0.1 -0.07 0.082" quat="0.7073883 0 0.7068252 0" solref="0.001 1" type="box" />
+            <geom density="100" name="noviz_collision_hole1_5" group="0" pos="0.1 -0.07 0.082" quat="0.7073883 0 0.7068252 0" rgba="0 0 0 0" size="0.0021 0.00825 0.00825" friction="0.95 0.3 0.2" solref="0.001 1" type="box" />
             <site group="0" name="hole-wire,0,90,180,270,conn_site1" pos="0.1 -0.07 0.084" rgba="0.9019 0.0980 0.2941 0.3" size="0.005" />
             <site name="insertion_hole_1_horizontal_radius_site" pos="0.1 -0.07 0.092" rgba="0 0 0 0" size="0.012" />
         </body>
@@ -287,13 +290,13 @@
 <!--        </body>-->
 
     </worldbody>
-    <tendon>
-<!--        <spatial limited="true" range="0 0.2" width="0.01" rgba="0.1 0.1 0.1 1">-->
-        <spatial limited="true" range="0 0.2" width="0.01" rgba="0.1 0.1 0.1 1">
-            <site site="wire1_end"/>
-            <site site="wire2_end"/>
-        </spatial>
-    </tendon>
+<!--    <tendon>-->
+<!--&lt;!&ndash;        <spatial limited="true" range="0 0.2" width="0.01" rgba="0.1 0.1 0.1 1">&ndash;&gt;-->
+<!--        <spatial limited="true" range="0 0.4" width="0.01" rgba="0.7 0.7 0.7 1" damping="0.5">-->
+<!--            <site site="wire1_end"/>-->
+<!--            <site site="wire2_end"/>-->
+<!--        </spatial>-->
+<!--    </tendon>-->
 
 <!--    <include file='assets/actuator0.xml'/>-->
 <!--    <include file='assets/actuator1.xml'/>-->

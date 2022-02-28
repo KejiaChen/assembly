@@ -478,6 +478,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
 
                 # initiate phases for single-part assembly
                 while self._phase != "part_done":
+                    # TODO: why 8
                     action = np.zeros((8,))
                     action_robot2 = np.zeros((8,))
                     max_griptip_height = max(
@@ -719,6 +720,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                         action[6] = 1
                         gconn_pos = self.sim.data.get_site_xpos(gconn)
                         tconn_pos = self.sim.data.get_site_xpos(tconn)
+                        # TODO: move xyz?
                         action[0:3] = self.move_z(
                             gconn_pos,
                             tconn_pos,
@@ -787,6 +789,11 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                     action = self._norm_rot_action(action)
                     action[0:5] = np.clip(action[0:5], -0.4, 0.4) # [-1,1]
                     # print(action)
+                    # TODO: action should have 2*8 dims
+                    # total_action = np.append(action, action_robot2)
+                    # total_action = {'0': action,
+                    #                 "1": action_robot2}
+                    total_action = [action, action_robot2]
                     ob, reward, _, info = self.step(action)
 
                     if self._config.render:
@@ -851,6 +858,11 @@ def main():
     parser.set_defaults(camera_ids=[0])
     parser.set_defaults(debug=True)
     parser.set_defaults(init_base_position=[[0, 0.65, -0.7], [0.7, 0.65, -0.7]])
+    # parser.set_defaults(follow=True)
+    parser.set_defaults(unity=False)
+    parser.set_defaults(background='Simple')
+    parser.set_defaults(record_demo=False)
+
 
     config, unparsed = parser.parse_known_args()
     if len(unparsed):
