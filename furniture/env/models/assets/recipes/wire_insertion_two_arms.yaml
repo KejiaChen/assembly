@@ -29,7 +29,7 @@ grip_init_pos:
 
 waypoints:
   -
-    - [0, 0, 0.1]
+    - [0, 0, 0.15]
 
 
 nogrip_safepos:

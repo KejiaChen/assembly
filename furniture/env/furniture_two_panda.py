@@ -75,7 +75,8 @@ class FurnitureTwoPandaEnv(FurnitureTwoEnv):
 
         ob, _, done, _ = super()._step(a)
 
-        reward, _done, info = self._compute_reward(a)
+        # TODO: reward depends only on first panda
+        reward, _done, info = self._compute_reward(a[0])
         done = done or _done
 
         if self._success:

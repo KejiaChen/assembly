@@ -196,6 +196,7 @@ class FurnitureTwoPandaDenseRewardEnv(FurnitureTwoPandaEnv):
             self._phase_i = 1
 
         for i in range(len(self._recipe["recipe"])):
+            # TODO: more than one? rewrite?
             g_l, g_r = f"{self._leg}_ltgt_site{i}", f"{self._leg}_rtgt_site{i}"
             if g_l not in self._used_sites and g_r not in self._used_sites:
                 self._used_sites.add(g_l)
@@ -217,10 +218,20 @@ class FurnitureTwoPandaDenseRewardEnv(FurnitureTwoPandaEnv):
             self._prev_lift_leg_z_dist = self._recipe["waypoints"][subtask_step][0][2]
             self._prev_lift_leg_xy_dist = 0.0
 
+    def _reset_follower(self):
+        self._leg_master, self._leg_follower = self._recipe["pair"][0]
+
+        for i in range(len(self._recipe["pair"])):
+            g_l_f, g_r_f = f"{self._leg_follower}_ltgt_site{i}", f"{self._leg_follower}_rtgt_site{i}"
+
+        self._get_leg_follow_grasp_pos = lambda: (self._get_pos(g_l_f) + self._get_pos(g_r_f)) / 2
+        self._get_leg_follow_grasp_vector = lambda: self._get_pos(g_r_f) - self._get_pos(g_l_f)
+
     def _reset(self, furniture_id=None, background=None):
         super()._reset(furniture_id, background)
         # TODO: reward depends only on robot0
         self._reset_reward_variables()
+        self._reset_follower()
 
     # TODO: change idx
     def _collect_values(self, idx=0):

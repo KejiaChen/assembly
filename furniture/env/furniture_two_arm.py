@@ -1299,7 +1299,8 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         """
         Step function for continuous control
         """
-        connect = action[-1]
+        # TODO: second action?
+        connect = action[0][-1]
         if self._control_type in ["ik", "ik_quaternion"]:
             self._do_ik_step(action)
 
@@ -2982,7 +2983,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             self.reset()
             self._fail = True
 
-    def _do_ik_step(self, action_robot0, idx=0):
+    def _do_ik_step(self, action_list, idx=0):
         """
         Take multiple physics simulation steps, bounded by self._control_timestep
         """
@@ -2994,11 +2995,11 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         # TODO: two robots, two controller. replace 0 with the id
         # TODO: approach 1 -- run step() for each robot separtely
 
-        idx = 0
-        connect = action_robot0[-1]
-        action_robot1 = np.zeros(8,)
-        action_robot1[6] = -1
-        action_list = [action_robot0, action_robot1]
+        # idx = 0
+        connect = action_list[0][-1]
+        # action_robot1 = np.zeros(8,)
+        # action_robot1[6] = -1
+        # action_list = [action_robot0, action_robot1]
         low_action_list = [None for _ in range(self.num_robots)]
 
         if self._control_type == "ik":
@@ -3080,7 +3081,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             # print("action", action_list)
             ctrl = np.concatenate((self._setup_action(low_action_list[0], idx=0),
                                    self._setup_action(low_action_list[1], idx=1)), axis=0)
-            print("ctrl", ctrl)
+            # print("ctrl", ctrl)
             for i in range(self._action_repeat):
                 self._do_simulation(ctrl)
                 if self._record_demo:
@@ -3106,10 +3107,9 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                         # low_action_list.append(low_action)
                     # print("another low action", low_action_list)
                     # print("another action", action_list)
-                    # TODO: why low_action_list[0] not work
                     ctrl = np.concatenate((self._setup_action(low_action_list[0], idx=0),
                                            self._setup_action(low_action_list[1], idx=1)), axis=0)
-                    print("another ctrl", ctrl)
+                    # print("another ctrl", ctrl)
 
         elif self._control_type == "ik_quaternion":
             arm_pos = {}

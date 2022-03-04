@@ -1,6 +1,7 @@
 import yaml
 import numpy as np
 from tqdm import tqdm
+import copy
 import gym.spaces
 
 import os
@@ -88,9 +89,12 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
             "move_waypoints",
             # "xy_move_t",
             "align_conn",
+            # "straighten",
             "xy_move_conn",
+            # "align_conn",
             "z_move_conn",
             "align_conn_fine",
+            # "follow",
             "z_move_conn_fine",
             "move_nogrip_safepos",
             "part_done",
@@ -117,6 +121,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
             "xy_move_g": (0, 0, 2),
             "xy_move_t": (-self._config.furn_xyz_rand, self._config.furn_xyz_rand, 2),
             "move_waypoints": (0, 2 * self._config.furn_xyz_rand, 3),
+            "straighten": (0, 2 * self._config.furn_xyz_rand, 3),
             "move_nogrip_safepos": (0, 2 * self._config.furn_xyz_rand, 3),
         }
         self.reset()
@@ -233,8 +238,8 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
             gripvec = -gripvec
         xyaction = T.angle_between2D(gripvec, gbodyvec)
         if abs(xyaction) < epsilon:
-            print("xyaction", xyaction)
-            print("gripfwdvec", gripvec)
+            # print("xyaction", xyaction)
+            # print("gripfwdvec", gripvec)
             xyaction = 0
         return xyaction
 
@@ -303,9 +308,9 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
             if abs(d[1]) < epsilon:
                 d[1] = 0
         else:
-            print("current distance", d)
-            self._phase_num += 1
-            print("the next phase", self._phases_gen[self._phase_num])
+            # print("current distance", d)
+            # self._phase_num += 1
+            # print("the next phase", self._phases_gen[self._phase_num])
             d[0:2] = 0
         # TODO: normalize -0.3 to -1 is meaningless!
         if abs(d[0]) > 0.04:
@@ -373,6 +378,10 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
             d[2] = (d[2] / abs(d[2])) * 0.04
         return d
 
+    def rotation_matrix_2d(self, angle):
+        return np.array([[np.cos(angle), -np.sin(angle)],[np.sin(angle), np.cos(angle)]])
+
+
     def generate_demos(self, n_demos):
         """
         Issues:
@@ -382,6 +391,9 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
         """
         # recipe: describe the start and target parts in each phrase
         p = self._recipe
+        trans_dist_limit = 0.42
+        align_dist_limit = 0.25
+        height_add = 0.15
 
         n_successful_demos = 0
         n_failed_demos = 0
@@ -425,7 +437,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
             for j in range(len(self._config.preassembled), len(p["recipe"])):
                 self._phase_num = 0
                 t_fwd = None
-                z_move_g_prev = None
+                z_move_g_prev = [None for _ in range(self.num_robots)]
 
                 safepos_idx = 0
                 safepos.clear()
@@ -454,7 +466,6 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                         gbody_name, tbody_name
                     )
                     # gconn_inverse = 'leg-table-inverse,0,90,180,270,conn_site2'
-                    # TODO: two grip_sites
                     grip_pos = self._get_pos(grip_site[0])
                     if p["use_closest"]:
                         gconn = self.get_closest_conn_site(gconn_names, grip_pos)
@@ -504,97 +515,163 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
 
                     elif self._phase == "xy_move_g":
                         action[6] = -1
-                        grip_xy_pos = self._get_pos(grip_site[0])[0:2]
-                        g_xy_pos = self._get_leg_grasp_pos()[0:2]
-                        action[0:2] = self.move_xy(
-                            grip_xy_pos, g_xy_pos, p["eps"], noise=noise[self._phase]
-                        )
+                        action_robot2[6] = -1
+                        # grip_xy_pos = self._get_pos(grip_site[0])[0:2]
+                        # g_xy_pos = self._get_leg_grasp_pos()[0:2]
+                        # action[0:2] = self.move_xy(
+                        #     grip_xy_pos, g_xy_pos, p["eps"], noise=noise[self._phase]
+                        # )
 
                         grip_xyz_pos = self._get_pos(grip_site[0])
+                        # TODO: integrate get leg grasp pos
                         g_xyz_pos = self._get_leg_grasp_pos()
                         pre_xyz_pos = g_xyz_pos + np.array([0, 0, 0.1])
                         action[0:3] = self.move_xyz(
                             grip_xyz_pos, pre_xyz_pos, p["eps"], noise=np.array([0,0,0])
                         )
 
+                        grip_xyz_pos2 = self._get_pos(grip_site[1])
+                        g_xyz_pos2 = self._get_leg_follow_grasp_pos()
+                        pre_xyz_pos2 = g_xyz_pos2 + np.array([0, 0, 0.1])
+                        action_robot2[0:3] = self.move_xyz(
+                            grip_xyz_pos2, pre_xyz_pos2, p["eps"], noise=np.array([0, 0, 0])
+                        )
+
+                        print("action 2", action_robot2)
+
+                        if all(action[0:3]==0) and all(action_robot2[0:3]==0):
+                            self._phase_num += 1
+                            print("the next phase", self._phases_gen[self._phase_num])
+
                     elif self._phase == "align_g":
                         action[6] = -1
+                        action_robot2[6] = -1
+                        rot_action = []
                         if grip_angles is None or grip_angles[j] is not None:
-                            # align gripper fingers with grip sites
-                            gripfwd_xy = self._get_forward_vector(grip_site[0])[0:2]
-                            # TODO: use the next line for panda gripper to correct xy rotation
-                            # gvec_xy = np.array([self._get_leg_grasp_vector()[0], self._get_leg_grasp_vector()[2]])
-                            gvec_xy = self._get_leg_grasp_vector()[0:2]
-                            # xy_ac: rotation angle around z axis
-                            # print("gvec_xy", gvec_xy)
-                            xy_ac = self.align_gripsites(
-                                gripfwd_xy, gvec_xy, p["rot_eps"]
-                            )
-                            # xy_ac = self.align2D(gripfwd_xy, gvec_xy, p['rot_eps'])
-                            # point gripper z downwards
-                            gripvec = self._get_up_vector(grip_site[0])
-                            # up vector should in z direction
-                            yz_ac = self.align2D(
-                                gripvec[1:3], align_g_tgt, p["rot_eps"]
-                            )
-                            xz_ac = self.align2D(
-                                gripvec[0::2], align_g_tgt, p["rot_eps"]
-                            )
-                            rot_action = [xy_ac, yz_ac, xz_ac]
-                            # if xy_ac == 0:
-                            if rot_action == [0, 0, 0]:
-                                grip_pos = self._get_pos(grip_site[0])[0:2]
-                                g_pos = self._get_leg_grasp_pos()
-                                action[0:2] = self.move_xy(
-                                    grip_pos, g_pos[0:2], p["eps"]
+                            for idx in range(self.num_robots):
+                                # align gripper fingers with grip sites
+                                gripfwd_xy = self._get_forward_vector(grip_site[idx])[0:2]
+                                # TODO: use the next line for panda gripper to correct xy rotation
+                                # gvec_xy = np.array([self._get_leg_grasp_vector()[0], self._get_leg_grasp_vector()[2]])
+                                if idx == 0:
+                                    gvec_xy = self._get_leg_grasp_vector()[0:2]
+                                elif idx == 1:
+                                    gvec_xy = self._get_leg_follow_grasp_vector()[0:2]
+                                # xy_ac: rotation angle around z axis
+                                # print("gvec_xy", gvec_xy)
+                                xy_ac = self.align_gripsites(
+                                    gripfwd_xy, gvec_xy, p["rot_eps"]
                                 )
+                                # xy_ac = self.align2D(gripfwd_xy, gvec_xy, p['rot_eps'])
+                                # point gripper z downwards
+                                gripvec = self._get_up_vector(grip_site[idx])
+                                # up vector should in z direction
+                                yz_ac = self.align2D(
+                                    gripvec[1:3], align_g_tgt, p["rot_eps"]
+                                )
+                                xz_ac = self.align2D(
+                                    gripvec[0::2], align_g_tgt, p["rot_eps"]
+                                )
+                                rot_action = [xy_ac, yz_ac, xz_ac]
+                                # if xy_ac == 0:
+                                if rot_action == [0, 0, 0]:
+                                    grip_pos = self._get_pos(grip_site[idx])[0:2]
+                                    if idx == 0:
+                                        g_pos = self._get_leg_grasp_pos()
+                                        action[0:2] = self.move_xy(
+                                            grip_pos, g_pos[0:2], p["eps"]
+                                        )
+                                    elif idx == 1:
+                                        g_pos = self._get_leg_follow_grasp_pos()
+                                        action_robot2[0:2] = self.move_xy(
+                                            grip_pos, g_pos[0:2], p["eps"]
+                                        )
+                                    # if all(action[0:2]==0) and all(action_robot2[0:2]==0):
+                                    #     self._phase_num += 1
+                                    #     print("the next phase", self._phases_gen[self._phase_num])
 
-                                # grip_xyz_pos = self._get_pos(grip_site)
-                                # g_xyz_pos = self._get_leg_grasp_pos()
-                                # pre_xyz_pos = g_xyz_pos + np.array([0, 0, 0.05])
-                                # action[0:3] = self.move_xyz(
-                                #     grip_xyz_pos, pre_xyz_pos, p["eps"]
-                                # )
+                                    # grip_xyz_pos = self._get_pos(grip_site)
+                                    # g_xyz_pos = self._get_leg_grasp_pos()
+                                    # pre_xyz_pos = g_xyz_pos + np.array([0, 0, 0.05])
+                                    # action[0:3] = self.move_xyz(
+                                    #     grip_xyz_pos, pre_xyz_pos, p["eps"]
+                                    # )
 
-                            else:
-                                # panda: smaller angular velocity
-                                action[3:6] = [xy_ac, yz_ac, xz_ac]
-                                # action[3:6] = rot_action
+                                else:
+                                    # panda: smaller angular velocity
+                                    if idx == 0:
+                                        action[3:6] = [xy_ac, yz_ac, xz_ac]
+                                    elif idx == 1:
+                                        action_robot2[3:6] = [xy_ac, yz_ac, xz_ac]
+                                    # action[3:6] = rot_action
+
+                            if all(action[0:6] == 0) and all(action_robot2[0:6] == 0):
+                                self._phase_num += 1
+                                print("the next phase", self._phases_gen[self._phase_num])
                         else:
                             self._phase_num += 1
                             print("the next phase", self._phases_gen[self._phase_num])
 
                     elif self._phase == "z_move_g":
                         action[6] = -1
-                        grip_pos = self._get_pos(grip_site[0])
-                        grip_tip = self._get_pos(griptip_site[0])
-                        g_pos = self._get_leg_grasp_pos()
-                        d = (g_pos) - grip_pos
-                        if z_move_g_prev is None:
-                            # TODO: what is the meaning of z_move_g_prev?
-                            z_move_g_prev = grip_tip[2] + ground_offset
+                        action_robot2[6] = -1
+                        for idx in range(self.num_robots):
+                            grip_pos = self._get_pos(grip_site[idx])
+                            grip_tip = self._get_pos(griptip_site[idx])
+                            if idx == 0:
+                                g_pos = self._get_leg_grasp_pos()
+                            elif idx == 1:
+                                g_pos = self._get_leg_follow_grasp_pos()
+                            d = (g_pos) - grip_pos
+                            if z_move_g_prev[idx] is None:
+                                # TODO: what is the meaning of z_move_g_prev?
+                                z_move_g_prev[idx] = grip_tip[2] + ground_offset
 
-                        if abs(d[2]) > p["eps"] and grip_tip[2] < z_move_g_prev:
-                        # if abs(d[2]) > p["eps"] and grip_tip[2] > 0:
-                            # distance is too large to grasp
-                            # keep moving in xyz
-                            action[0:3] = d
-                            z_move_g_prev = grip_tip[2] - ground_offset
-                        else:
-                            print("distance", d)
-                            # distance is small enough
-                            # grasp the object
-                            action[6] = 1
+                            if abs(d[2]) > p["eps"] and grip_tip[2] < z_move_g_prev[idx]:
+                            # if abs(d[2]) > p["eps"] and grip_tip[2] > 0:
+                                # distance is too large to grasp
+                                # keep moving in xyz
+                                if idx == 0:
+                                    action[0:3] = d
+                                elif idx == 1:
+                                    action_robot2[0:3] = d
+                                z_move_g_prev[idx] = grip_tip[2] - ground_offset
+                            else:
+                                print("distance", d)
+                                # distance is small enough
+                                # grasp the object
+                                if idx == 0:
+                                    action[6] = 1
+                                elif idx == 1:
+                                    action_robot2[6] = 1
+                                # self._phase_num += 1
+                                # print("the next phase", self._phases_gen[self._phase_num])
+
+                        if action[6] == 1 and action_robot2[6] == 1:
+                        # if action[6] == 1:
                             self._phase_num += 1
                             print("the next phase", self._phases_gen[self._phase_num])
                             if p["waypoints"][j] is not None:
                                 gripbase_pos = self._get_pos(gripbase_site[0])
+                                gripbase_pos2 = self._get_pos(gripbase_site[1])
+                                # grip_pos = self._get_pos(grip_site[0])
+                                # grip_pos2 = self._get_pos(grip_site[1])
+                                # straighten_pos2 = np.array([trans_dist_limit, 0, 0]) + grip_pos
+
                                 for pos in p["waypoints"][j]:
-                                    safepos.append(gripbase_pos + pos)
+                                    align_dist = np.array([align_dist_limit, 0, 0.02])
+                                    height_diff = np.array([0, 0, gripbase_pos[2] - gripbase_pos2[2]])
+                                    # TODO: if follower is higher
+                                    height_add_array = np.array([0, 0, height_add])
+                                    safe_pos2 = gripbase_pos + pos + np.array([0.43, 0, height_add])
+                                    # safepos.append([gripbase_pos + pos, gripbase_pos + pos + align_dist])
+                                    # safepos.append([gripbase_pos + pos, gripbase_pos2 + pos + height_diff + height_add_array])
+                                    safepos.append([gripbase_pos + pos, safe_pos2])
                                     print("pick up", safepos[-1])
 
                     elif self._phase == "move_waypoints":
                         action[6] = 1
+                        action_robot2[6] = 1
                         if p["waypoints"][j] is None or (  # no available way points
                             p["waypoints"][j] and safepos_idx >= len(p["waypoints"][j])  # have reached way points
                         ):
@@ -619,11 +696,18 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                             gripbase_pos = self._get_pos(gripbase_site[0])
                             action[0:3] = self.trans_scaling*self.move_xyz(
                                 gripbase_pos,
-                                safepos[safepos_idx],
+                                safepos[safepos_idx][0],
                                 p["eps"],
                                 noise=noise[self._phase],
                             )
-                            if not np.any(action[0:3]):
+                            gripbase_pos2 = self._get_pos(gripbase_site[1])
+                            action_robot2[0:3] = self.trans_scaling * self.move_xyz(
+                                gripbase_pos2,
+                                safepos[safepos_idx][1],
+                                p["eps"],
+                                noise=noise[self._phase],
+                            )
+                            if not np.any(action[0:3]) and not np.any(action_robot2[0:3]):
                                 safepos_idx += 1
 
                     # elif self._phase == "xy_move_t":
@@ -638,6 +722,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
 
                     elif self._phase == "align_conn":
                         action[6] = 1
+                        action_robot2[6] = 1
                         g_up = self._get_up_vector(gconn)
                         # gripper_up = self._get_up_vector(gconn)
                         t_up = self._get_up_vector(tconn)
@@ -653,30 +738,101 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                                 t_xy_fwd = t_fwd[0:2]
                             xy_ac = self.align2D(g_xy_fwd, t_xy_fwd, p["rot_eps"])
                             print("xy_ac", xy_ac)
+                            # # TODO: since contact face is a circle:
+                            # xy_ac = 0
                             if xy_ac == 0:
                                 t_fwd = None
                                 self._phase_num += 1
                                 print("the next phase", self._phases_gen[self._phase_num])
+                                # next straighten pos
+                                grip_pos = self._get_pos(grip_site[0])
+                                grip_pos2 = self._get_pos(grip_site[1])
+                                grip_vec = (grip_pos2 - grip_pos) / np.linalg.norm(grip_pos2 - grip_pos)
+                                self.straighten_pos = grip_pos + 0.44 * grip_vec
                             else:
                                 action[3] = -xy_ac
+                                # # TODO: follow rotation
+                                grip_pos_xy = self._get_pos(grip_site[0])[0:2]
+                                grip_pos_xy2 = self._get_pos(grip_site[1])[0:2]
+                                rotation_matrix_xy = self.rotation_matrix_2d(-xy_ac)
+                                rotation_vector = np.reshape(grip_pos_xy2 - grip_pos_xy, (2, 1))
+                                rotated_grip_pos_xy2 = grip_pos_xy + np.matmul(rotation_matrix_xy,
+                                                                               rotation_vector).flatten()
+                                action_robot2[0:2] = self.move_xy(
+                                    grip_pos_xy2, rotated_grip_pos_xy2, p["eps"]
+                                )
                         else:
                             action[3:6] = rot_action
 
+                        # follow translation:
+                        # action_robot2[0:3] = copy.deepcopy(action[0:3])
+
+                    elif self._phase == "straighten":
+                        action[6] = 1
+                        action_robot2[6] = 1
+                        # wire_end_1 = self._get_pos("wire1_end")
+                        # wire_end_2 = self._get_pos("wire2_end")
+                        # wire_end_dist = np.linalg.norm(wire_end_2 - wire_end_1)
+                        # wire_end_straighten =
+                        grip_pos = self._get_pos(grip_site[0])
+                        grip_pos2 = self._get_pos(grip_site[1])
+                        grip_vec = (grip_pos2 - grip_pos)/np.linalg.norm(grip_pos2 - grip_pos)
+                        straighten_pos = grip_pos + 0.4*grip_vec
+                        # TODO: keep two grippers within a certain distance (max=0.45)
+                        grip_dist = np.linalg.norm(grip_pos2 - grip_pos)
+                        # if grip_dist < 0.3:
+                        if True:
+                            # TODO: change straighten_pos2
+                            straighten_pos2 = np.array([align_dist_limit, 0, 0]) + grip_pos
+                            # gripbase_pos = self._get_pos(gripbase_site[0])
+                            # gripbase_pos2 = self._get_pos(gripbase_site[1])
+                            # straighten_pos2 = np.array([trans_dist_limit, 0, 0]) + gripbase_pos
+                            action_robot2[0:3] = self.trans_scaling * self.move_xyz(
+                                grip_pos2,
+                                self.straighten_pos,
+                                p["eps"],
+                                noise=noise[self._phase],
+                            )
+                            if not np.any(action_robot2[0:3]):
+                                self._phase_num += 1
+                                print("the next phase", self._phases_gen[self._phase_num])
+                        else:
+                            self._phase_num += 1
+                            print("the next phase", self._phases_gen[self._phase_num])
+
                     elif self._phase == "xy_move_conn":
                         action[6] = 1
+                        action_robot2[6] = 1
                         gconn_pos = self.sim.data.get_site_xpos(gconn)
                         tconn_pos = self.sim.data.get_site_xpos(tconn)
-                        action[0:2] = self.move_xy(
-                            gconn_pos[0:2], tconn_pos[0:2], p["eps"]
-                        )
-
+                        # action[0:2] = self.move_xy(
+                        #     gconn_pos[0:2], tconn_pos[0:2], p["eps"]
+                        # )
                         pre_tconn_pos = tconn_pos + np.array([0, 0, 0.05])
                         action[0:3] = self.move_xyz(
                             gconn_pos, pre_tconn_pos, p["eps"]
                         )
 
+                        # follow translation:
+                        action_robot2[0:3] = copy.deepcopy(action[0:3])
+                        if all(action[0:3] == 0):
+                            # gripbase_pos = self._get_pos(gripbase_site[0])
+                            # gripbase_pos2 = self._get_pos(gripbase_site[1])
+                            # straighten_pos2 = np.array([trans_dist_limit, 0, 0]) + gripbase_pos
+                            # action_robot2[0:3] = self.trans_scaling * self.move_xyz(
+                            #     gripbase_pos2, straighten_pos2, p["eps"]
+                            # )
+                            if all(action_robot2[0:3] == 0):
+                                self._phase_num += 1
+                                print("the next phase", self._phases_gen[self._phase_num])
+
+                        # if all(action[0:3] == 0) and all(action_robot2[0:3] == 0):
+                        #     self._phase_num += 1
+                        #     print("the next phase", self._phases_gen[self._phase_num])
+
                     elif self._phase == "z_move_conn":
                         action[6] = 1
+                        action_robot2[6] = 1
                         gconn_pos = self.sim.data.get_site_xpos(gconn)
                         # gconn_inverse_pos = self.sim.data.get_site_xpos(gconn_inverse)
                         tconn_pos = self.sim.data.get_site_xpos(tconn)
@@ -687,37 +843,103 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                             p["eps"],
                             z_conn_dist + p["z_finedist"],
                         )
-                        if not np.any(action[0:3]):
-                            self._phase_num += 1
-                            print("the next phase", self._phase)
+                        # follow translation:
+                        action_robot2[0:3] = copy.deepcopy(action[0:3])
+                        if all(action[0:3] == 0):
+                            grip_pos = self._get_pos(grip_site[0])
+                            grip_pos2 = self._get_pos(grip_site[1])
+                            # TODO: next step is align
+                            # straighten_pos2 = np.array([0.4, 0.0, height_add]) + grip_pos
+                            # # gripbase_pos = self._get_pos(gripbase_site[0])
+                            # # gripbase_pos2 = self._get_pos(gripbase_site[1])
+                            # # straighten_pos2 = np.array([trans_dist_limit, 0, 0]) + gripbase_pos
+                            # action_robot2[0:3] = self.trans_scaling * self.move_xyz(
+                            #     grip_pos2, straighten_pos2, p["eps"]
+                            # )
+                            if all(action_robot2[0:3] == 0):
+                                self._phase_num += 1
+                                print("the next phase", self._phases_gen[self._phase_num])
+
+                        # if not np.any(action[0:3]) and not np.any(action_robot2[0:3]):
+                        #     self._phase_num += 1
+                        #     print("the next phase", self._phase)
 
                     elif self._phase == "align_conn_fine":
                         action[6] = 1
+                        action_robot2[6] = 1
                         g_up = self._get_up_vector(gconn)
                         t_up = self._get_up_vector(tconn)
                         yz_ac = self.align2D(g_up[1:], t_up[1:], p["rot_eps_fine"])
                         xz_ac = self.align2D(g_up[0::2], t_up[0::2], p["rot_eps_fine"])
                         rot_action = [0, yz_ac, xz_ac]
+                        print("rot_action", rot_action)
                         if rot_action == [0, 0, 0]:
-                            g_xy_fwd = self._get_forward_vector(gconn)[0:2]
-                            if t_fwd is None:
-                                t_fwd = self.get_closest_xy_fwd(
-                                    allowed_angles, gconn, tconn
-                                )
-                                t_xy_fwd = t_fwd[0:2]
-                            xy_ac = self.align2D(g_xy_fwd, t_xy_fwd, p["rot_eps_fine"])
+                            # g_xy_fwd = self._get_forward_vector(gconn)[0:2]
+                            # if t_fwd is None:
+                            #     t_fwd = self.get_closest_xy_fwd(
+                            #         allowed_angles, gconn, tconn
+                            #     )
+                            #     t_xy_fwd = t_fwd[0:2]
+                            # xy_ac = self.align2D(g_xy_fwd, t_xy_fwd, p["rot_eps_fine"])
+                            xy_ac = 0
+                            print("xyac", xy_ac)
                             if xy_ac == 0:
                                 # must be finely aligned rotationally and translationally to go to next phase
                                 action[0:2] = self.move_xy(
                                     gconn_pos[0:2], tconn_pos[0:2], p["eps_fine"]
                                 )
+                                # follow translation
+                                action_robot2[0:2] = copy.deepcopy(action[0:2])
+                                if all(action[0:3] == 0):
+                                    # grip_pos = self._get_pos(grip_site[0])
+                                    # grip_pos2 = self._get_pos(grip_site[1])
+                                    # straighten_pos2 = np.array([trans_dist_limit, 0, 0]) + grip_pos
+                                    # # gripbase_pos = self._get_pos(gripbase_site[0])
+                                    # # gripbase_pos2 = self._get_pos(gripbase_site[1])
+                                    # # straighten_pos2 = np.array([trans_dist_limit, 0, 0]) + gripbase_pos
+                                    # action_robot2[0:3] = self.trans_scaling * self.move_xyz(
+                                    #     grip_pos2, straighten_pos2, p["eps"]
+                                    # )
+                                    # if all(action_robot2[0:3] == 0):
+                                    if True:
+                                        self._phase_num += 1
+                                        print("the next phase", self._phases_gen[self._phase_num])
+                                        grip_pos2 = self._get_pos(grip_site[1])
+                                        self.follow_pos = grip_pos2 + np.array([0, 0, -0.1])
+                                # if not np.any(action[0:3]) and not np.any(action_robot2[0:3]):
+                                #     self._phase_num += 1
+                                #     print("the next phase", self._phase)
                             else:
                                 action[3] = -xy_ac
+                                # TODO: follow rotation
+                                grip_pos_xy = self._get_pos(grip_site[0])[0:2]
+                                grip_pos_xy2 = self._get_pos(grip_site[1])[0:2]
+                                rotation_matrix_xy = self.rotation_matrix_2d(xy_ac)
+                                rotation_vector = np.reshape(grip_pos_xy2-grip_pos_xy, (2, 1))
+                                rotated_grip_pos_xy2 = grip_pos_xy + np.matmul(rotation_matrix_xy, rotation_vector).flatten()
+                                action_robot2[0:2] = self.move_xy(
+                                    grip_pos_xy2, rotated_grip_pos_xy2, p["eps"]
+                                )
+                                # rotation_radius = np.linalg.norm(grip_pos_xy2 - grip_pos_xy)
+                                # rotation_dist = xy_ac * rotation_radius
+                                # action_robot2[3] = copy.deepcopy(action[3])
                         else:
                             action[3:6] = rot_action
 
+                    elif self._phase == "follow":
+                        action[6] = 1
+                        action_robot2[6] = 1
+                        grip_pos2 = self._get_pos(grip_site[1])
+                        action_robot2[0:3] = self.move_xyz(
+                            grip_pos2, self.follow_pos, p["eps"]
+                        )
+                        if all(action_robot2[0:3] == 0):
+                            self._phase_num += 1
+                            print("the next phase", self._phases_gen[self._phase_num])
+
                     elif self._phase == "z_move_conn_fine":
                         action[6] = 1
+                        action_robot2[6] = 1
                         gconn_pos = self.sim.data.get_site_xpos(gconn)
                         tconn_pos = self.sim.data.get_site_xpos(tconn)
                         # TODO: move xyz?
@@ -728,6 +950,10 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                             z_conn_dist,
                             fine=p["fine_magnitude"],
                         )
+                        # follow
+                        action_robot2[3] = copy.deepcopy(action[3])
+                        print("action", action[0:3])
+
                         g_up = self._get_up_vector(gconn)
                         t_up = self._get_up_vector(tconn)
                         yz_ac = self.align2D(g_up[1:], t_up[1:], p["rot_eps_fine"])
@@ -740,14 +966,17 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                                     allowed_angles, gconn, tconn
                                 )
                                 t_xy_fwd = t_fwd[0:2]
-                            xy_ac = self.align2D(g_xy_fwd, t_xy_fwd, p["rot_eps_fine"])
+                            xy_ac = 0
+                            # xy_ac = self.align2D(g_xy_fwd, t_xy_fwd, p["rot_eps_fine"])
                             # if abs(xy_ac) < 0.05:
                             #     xy_ac = 0
                             # if abs(yz_ac) < 0.05:
                             #     yz_ac = 0
                             # if abs(yz_ac) < 0.05:
                             #     xz_ac = 0
-                        action[3:6] = [-xy_ac, yz_ac, xz_ac]
+                        # action[3:6] = [-xy_ac, yz_ac, xz_ac]
+                        # TODO: does this make sense?
+                        action[3:6] = [0, 0, 0]
                         if not np.any(action[0:3]):
                             # action [7]: connect
                             action[7] = 1
@@ -788,13 +1017,18 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                     action[3:6] = p["rot_magnitude"] * action[3:6]
                     action = self._norm_rot_action(action)
                     action[0:5] = np.clip(action[0:5], -0.4, 0.4) # [-1,1]
+
+                    action_robot2[0:3] = p["lat_magnitude"] * action_robot2[0:3]
+                    action_robot2[3:6] = p["rot_magnitude"] * action_robot2[3:6]
+                    action_robot2 = self._norm_rot_action(action_robot2)
+                    action_robot2[0:5] = np.clip(action_robot2[0:5], -0.4, 0.4)  # [-1,1]
                     # print(action)
                     # TODO: action should have 2*8 dims
                     # total_action = np.append(action, action_robot2)
                     # total_action = {'0': action,
                     #                 "1": action_robot2}
                     total_action = [action, action_robot2]
-                    ob, reward, _, info = self.step(action)
+                    ob, reward, _, info = self.step(total_action)
 
                     if self._config.render:
                         self.render()
@@ -862,7 +1096,6 @@ def main():
     parser.set_defaults(unity=False)
     parser.set_defaults(background='Simple')
     parser.set_defaults(record_demo=False)
-
 
     config, unparsed = parser.parse_known_args()
     if len(unparsed):
