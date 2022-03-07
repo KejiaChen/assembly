@@ -381,6 +381,13 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
     def rotation_matrix_2d(self, angle):
         return np.array([[np.cos(angle), -np.sin(angle)],[np.sin(angle), np.cos(angle)]])
 
+    def follow_rotation_xy(self, grip_site, xy_ac, eps):
+        grip_pos_xy = self._get_pos(grip_site[0])[0:2]
+        grip_pos_xy2 = self._get_pos(grip_site[1])[0:2]
+        rotation_matrix_xy = self.rotation_matrix_2d(xy_ac)
+        rotation_vector = np.reshape(grip_pos_xy2 - grip_pos_xy, (2, 1))
+        rotated_grip_pos_xy2 = grip_pos_xy + np.matmul(rotation_matrix_xy, rotation_vector).flatten()
+        return self.move_xy(grip_pos_xy2, rotated_grip_pos_xy2, eps)
 
     def generate_demos(self, n_demos):
         """
@@ -483,7 +490,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                     # TODO: debugging
                     # while True:
                     #     self.render()
-                    #     ob, reward, _, info = self.step(np.zeros((8,)))
+                    #     print("hole_pos", self._get_pos('hole-wire,0,90,180,270,conn_site1'))
                 if self._config.record_vid:
                     self.vid_rec.capture_frame(self.render("rgb_array")[0])
 
@@ -738,7 +745,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                                 t_xy_fwd = t_fwd[0:2]
                             xy_ac = self.align2D(g_xy_fwd, t_xy_fwd, p["rot_eps"])
                             print("xy_ac", xy_ac)
-                            # # TODO: since contact face is a circle:
+                            # # TODO: contact face is a circular face regardless of xy_ac
                             # xy_ac = 0
                             if xy_ac == 0:
                                 t_fwd = None
@@ -747,6 +754,9 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                                 # next straighten pos
                                 grip_pos = self._get_pos(grip_site[0])
                                 grip_pos2 = self._get_pos(grip_site[1])
+                                B1_l_site = 'B1_ltgt_site0'
+                                B1_r_site = 'B1_rtgt_site0'
+                                # grip_vec = -(self._get_pos(B1_l_site) - self._get_pos(B1_r_site))
                                 grip_vec = (grip_pos2 - grip_pos) / np.linalg.norm(grip_pos2 - grip_pos)
                                 self.straighten_pos = grip_pos + 0.44 * grip_vec
                             else:
@@ -872,6 +882,19 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                         yz_ac = self.align2D(g_up[1:], t_up[1:], p["rot_eps_fine"])
                         xz_ac = self.align2D(g_up[0::2], t_up[0::2], p["rot_eps_fine"])
                         rot_action = [0, yz_ac, xz_ac]
+                        # TODO: follow rotation xz_ac
+                        # grip_pos_xz = np.array([self._get_pos(grip_site[0])[0], self._get_pos(grip_site[0])[2]])
+                        # grip_pos_xz2 = np.array([self._get_pos(grip_site[1])[0], self._get_pos(grip_site[1])[2]])
+                        # rotation_matrix_xz = self.rotation_matrix_2d(-xz_ac)
+                        # # rotation_vector = np.reshape(grip_pos_xz2 - grip_pos_xz, (2, 1))
+                        # rotation_vector = 0.075*(grip_pos_xz2 - grip_pos_xz)/np.linalg.norm(grip_pos_xz2 - grip_pos_xz)
+                        # rotated_grip_pos_xz2 = grip_pos_xz + np.matmul(rotation_matrix_xz, rotation_vector).flatten()
+                        # action_robot2[0] = self.move_xy(
+                        #     grip_pos_xz2, rotated_grip_pos_xz2, p["eps"]
+                        # )[0]
+                        # action_robot2[2] = self.move_xy(
+                        #     grip_pos_xz2, rotated_grip_pos_xz2, p["eps"]
+                        # )[1]
                         print("rot_action", rot_action)
                         if rot_action == [0, 0, 0]:
                             # g_xy_fwd = self._get_forward_vector(gconn)[0:2]
@@ -1033,7 +1056,6 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                     if self._config.render:
                         self.render()
                         # time buffer
-
                         self.render()
                     if self._config.record_vid:
                         self.vid_rec.capture_frame(self.render("rgb_array")[0])

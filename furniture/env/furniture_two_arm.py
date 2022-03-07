@@ -2052,13 +2052,18 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         """
         Loads the arena XML
         """
-        floor_full_size = (1.5, 1.0)
+        floor_full_size = (2.0, 1.0)
         floor_friction = (2.0, 0.005, 0.0001)
+        # TODO: table arena
         from .models.arenas import FloorArena
+        from .models.arenas import TableArena
 
         self.mujoco_arena = FloorArena(
             floor_full_size=floor_full_size, floor_friction=floor_friction
         )
+        # self.mujoco_arena = TableArena(
+        #     table_full_size=(1.5, 1.0, 0.677045), table_friction=floor_friction
+        # )
 
     def _load_model_object(self):
         """

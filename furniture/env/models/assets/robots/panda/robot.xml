@@ -37,8 +37,12 @@
         <mesh name="link6_vis" file="meshes/link6_vis.stl" />
         <mesh name="link7_vis" file="meshes/link7_vis.stl" />
         <mesh file="meshes/pedestal.stl" name="pedestal"/>
+<!--        <texture builtin="gradient" height="256" rgb1=".9 .9 1." rgb2=".2 .3 .4" type="skybox" width="256"/>-->
+<!--        <texture builtin="checker" height="512" name="texplane" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" type="2d" width="512"/>-->
+<!--        <material name="floorplane" reflectance="0.5" texrepeat="1 1" texture="texplane" texuniform="true"/>-->
     </asset>
     <worldbody>
+<!--        <geom condim="3" material="floorplane" name="FLOOR" pos="0 0 -0.89" size="3 3 .125" type="plane"/>-->
         <body name="link0" pos="0 0 0">
             <body name="base" pos="0 0 0">
                 <inertial diaginertia="0 0 0" mass="0" pos="0 0 0"/>
@@ -58,6 +62,7 @@
                     <inertial diaginertia="6.0869 5.81635 4.20915" mass="60.864" pos="0 0 0" quat="0.659267 -0.259505 -0.260945 0.655692"/>
                     <geom conaffinity="0" contype="0" group="1" mesh="pedestal" pos="0.26 0.345 -0.91488" quat="0.5 0.5 -0.5 -0.5" rgba="0.2 0.2 0.2 1" type="mesh" name="pedestal_col1"/>
                     <geom pos="-0.02 0 -0.29" rgba="0.2 0.2 0.2 1" size="0.18 0.31" type="cylinder" name="pedestal_col2"/>
+                    <site pos="0.25 0.33 -0.89" name="pedestal_bottom" rgba="1 1 0 1" size="0.0055"/>
                 </body>
             </body>
             <inertial pos="0 0 0.05" mass="4" diaginertia="0.4 0.4 0.4" />
