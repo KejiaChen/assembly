@@ -85,7 +85,8 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
             "init_grip",
             "xy_move_g",
             "align_g",
-            "z_move_g",
+            "z_move_g_1",
+            "z_move_g_2",
             "move_waypoints",
             # "xy_move_t",
             "align_conn",
@@ -619,10 +620,49 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                             self._phase_num += 1
                             print("the next phase", self._phases_gen[self._phase_num])
 
-                    elif self._phase == "z_move_g":
+                    elif self._phase == "z_move_g_1":
                         action[6] = -1
                         action_robot2[6] = -1
-                        for idx in range(self.num_robots):
+                        for idx in [int(0)]:
+                            grip_pos = self._get_pos(grip_site[idx])
+                            grip_tip = self._get_pos(griptip_site[idx])
+                            if idx == 0:
+                                g_pos = self._get_leg_grasp_pos()
+                            elif idx == 1:
+                                g_pos = self._get_leg_follow_grasp_pos()
+                            d = (g_pos) - grip_pos
+                            if z_move_g_prev[idx] is None:
+                                # TODO: what is the meaning of z_move_g_prev?
+                                z_move_g_prev[idx] = grip_tip[2] + ground_offset
+
+                            if abs(d[2]) > p["eps"] and grip_tip[2] < z_move_g_prev[idx]:
+                            # if abs(d[2]) > p["eps"] and grip_tip[2] > 0:
+                                # distance is too large to grasp
+                                # keep moving in xyz
+                                if idx == 0:
+                                    action[0:3] = d
+                                elif idx == 1:
+                                    action_robot2[0:3] = d
+                                z_move_g_prev[idx] = grip_tip[2] - ground_offset
+                            else:
+                                print("distance", d)
+                                # distance is small enough
+                                # grasp the object
+                                if idx == 0:
+                                    action[6] = 1
+                                elif idx == 1:
+                                    action_robot2[6] = 1
+                                # self._phase_num += 1
+                                # print("the next phase", self._phases_gen[self._phase_num])
+                        if action[6] == 1:
+                        # if action[6] == 1:
+                            self._phase_num += 1
+                            print("the next phase", self._phases_gen[self._phase_num])
+
+                    elif self._phase == "z_move_g_2":
+                        action[6] = 1
+                        action_robot2[6] = -1
+                        for idx in [int(1)]:
                             grip_pos = self._get_pos(grip_site[idx])
                             grip_tip = self._get_pos(griptip_site[idx])
                             if idx == 0:
@@ -746,7 +786,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                             xy_ac = self.align2D(g_xy_fwd, t_xy_fwd, p["rot_eps"])
                             print("xy_ac", xy_ac)
                             # # TODO: contact face is a circular face regardless of xy_ac
-                            # xy_ac = 0
+                            xy_ac = 0
                             if xy_ac == 0:
                                 t_fwd = None
                                 self._phase_num += 1
