@@ -41,8 +41,8 @@ grip_angles:
   -
     - [0, 0, -1]
 
-
-# TODO: what does "90""270" mean?
+reach_recipe:
+  - !!python/tuple ["wire-hole,conn_site1", "hole-wire,reach_site1", 90]
 site_recipe:
 #  - !!python/tuple ["wire-hole,0,90,180,270,conn_site1", "table-wire,0,90,180,270,conn_site1", 90]
   - !!python/tuple ["wire-hole,conn_site1", "hole-wire,conn_site1", 90]

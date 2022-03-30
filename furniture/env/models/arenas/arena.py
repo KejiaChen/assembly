@@ -85,7 +85,7 @@ class FloorArena(Arena):
     """Workspace that contains an empty floor."""
 
     def __init__(
-        self, floor_full_size=(1., 1.), floor_friction=(1, 0.005, 0.0001)
+        self, floor_pos=[0, 0], floor_full_size=(1., 1.), floor_friction=(1, 0.005, 0.0001)
     ):
         """
         Args:
@@ -102,9 +102,10 @@ class FloorArena(Arena):
         self.leg_full_size = np.array([0.05, 0.677-self.table_full_size[2]])
         self.leg_half_size = self.leg_full_size/2
         self.floor_friction = floor_friction
-        self.floor_pos = np.array([0, 0, -0.025])
+        self.floor_pos = np.array([floor_pos[0], floor_pos[1], -0.025])
 
         self.floor = self.worldbody.find("./geom[@name='FLOOR']")
+        self.floor.set("pos", array_to_string(np.array([floor_pos[0], floor_pos[1], 0])))
         self.floor.set("size", array_to_string(self.floor_half_size))
         self.floor.set("friction", array_to_string(self.floor_friction))
 
@@ -119,32 +120,32 @@ class FloorArena(Arena):
 
         self.leg1 = self.worldbody.find(".//geom[@name='table_leg1_visual']")
         # self.leg1_pos = np.array([self.table_half_size[0], self.table_half_size[1], -0.677+self.leg_half_size[1]])
-        self.leg1_pos = np.array([-(self.table_half_size[0]-3*self.leg_half_size[0]),
-                                  self.table_half_size[1]-3*self.leg_half_size[0],
-                                  -0.677 + self.leg_half_size[1]])
+        self.leg1_pos = np.array([self.floor_pos[0]-(self.table_half_size[0]-3*self.leg_half_size[0]),
+                                  self.floor_pos[1]+self.table_half_size[1]-3*self.leg_half_size[0],
+                                  self.floor_pos[2]-0.677 + self.leg_half_size[1]])
         self.leg1.set("pos", array_to_string(self.leg1_pos))
         self.leg1.set("size", array_to_string(self.leg_half_size))
 
         self.leg2 = self.worldbody.find(".//geom[@name='table_leg2_visual']")
         # self.leg1_pos = np.array([self.table_half_size[0], self.table_half_size[1], -0.677+self.leg_half_size[1]])
-        self.leg2_pos = np.array([-(self.table_half_size[0] - 3 * self.leg_half_size[0]),
-                                  -(self.table_half_size[1] - 3 * self.leg_half_size[0]),
-                                  -0.677 + self.leg_half_size[1]])
+        self.leg2_pos = np.array([self.floor_pos[0]-(self.table_half_size[0] - 3 * self.leg_half_size[0]),
+                                  self.floor_pos[1]-(self.table_half_size[1] - 3 * self.leg_half_size[0]),
+                                  self.floor_pos[2]-0.677 + self.leg_half_size[1]])
         self.leg2.set("pos", array_to_string(self.leg2_pos))
         self.leg2.set("size", array_to_string(self.leg_half_size))
 
         self.leg3 = self.worldbody.find(".//geom[@name='table_leg3_visual']")
         # self.leg1_pos = np.array([self.table_half_size[0], self.table_half_size[1], -0.677+self.leg_half_size[1]])
-        self.leg3_pos = np.array([self.table_half_size[0] - 3 * self.leg_half_size[0],
-                                  self.table_half_size[1] - 3 * self.leg_half_size[0],
-                                  -0.677 + self.leg_half_size[1]])
+        self.leg3_pos = np.array([self.floor_pos[0]+self.table_half_size[0] - 3 * self.leg_half_size[0],
+                                  self.floor_pos[1]+self.table_half_size[1] - 3 * self.leg_half_size[0],
+                                  self.floor_pos[2]-0.677 + self.leg_half_size[1]])
         self.leg3.set("pos", array_to_string(self.leg3_pos))
         self.leg3.set("size", array_to_string(self.leg_half_size))
 
         self.leg4 = self.worldbody.find(".//geom[@name='table_leg4_visual']")
         # self.leg1_pos = np.array([self.table_half_size[0], self.table_half_size[1], -0.677+self.leg_half_size[1]])
-        self.leg4_pos = np.array([self.table_half_size[0] - 3 * self.leg_half_size[0],
-                                  -(self.table_half_size[1] - 3 * self.leg_half_size[0]),
-                                  -0.677 + self.leg_half_size[1]])
+        self.leg4_pos = np.array([self.floor_pos[0]+self.table_half_size[0] - 3 * self.leg_half_size[0],
+                                  self.floor_pos[1]-(self.table_half_size[1] - 3 * self.leg_half_size[0]),
+                                  self.floor_pos[2]-0.677 + self.leg_half_size[1]])
         self.leg4.set("pos", array_to_string(self.leg4_pos))
         self.leg4.set("size", array_to_string(self.leg_half_size))

@@ -187,7 +187,8 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                     record_mode=config.record_mode, prefix=self.file_prefix
                 )
 
-        self._num_connect_steps = 0
+        # TODO: get self._num_connect_steps from receipe
+        self._num_connect_steps = 1
         self._gravity_compensation = 0
 
         self._move_speed = config.move_speed
@@ -965,6 +966,8 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         then we interpolate the 2 parts towards the target position and orientation
         for smoother visual connection.
         """
+
+
         if part1 is not None:
             body1_ids = [
                 self.sim.model.body_name2id(obj_name)
@@ -1022,12 +1025,15 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                 ):
                     continue
                 if site1_pairs == site2_pairs[::-1]:
-                    # TODO: the align condition is unnecessary for peg in hole
-                    # if True:
-                    if self._is_aligned(site1_name, site2_name):
+                    # TODO: the align condition is unnecessary for wire insertion
+                    if True:
+                        alinged = self._is_aligned(site1_name, site2_name)
+                    # if self._is_aligned(site1_name, site2_name):
                         logger.debug(
                             f"connect {site1_name} and {site2_name}, {self._connect_step}/{self._num_connect_steps}"
                         )
+                        # TODO: correct self._num_connect_steps
+                        self._num_connect_steps = 0
                         if self._connect_step < self._num_connect_steps:
                             # set target as site2 pos
                             site1_pos_quat = self._site_xpos_xquat(site1_name)
@@ -1071,7 +1077,8 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                             self._connect_step += 1
                             return False
                         else:
-                            self._connect(site1_id, site2_id, self._auto_align)
+                            # self._connect(site1_id, site2_id, self._auto_align)
+                            self._connect(site1_id, site2_id, auto_align=False)
                             self._connect_step = 0
                             self.next_pos = self.next_rot = None
                             return True
@@ -1327,7 +1334,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             self._do_controller_step(action)
 
         if connect > 0:
-            for arm in self._arms:
+            for arm in self.robot_configs[0]["arms"]:
                 touch_left_finger = {}
                 touch_right_finger = {}
                 for body_id in self._object_body_ids:
@@ -1339,24 +1346,24 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                     body1 = self.sim.model.geom_bodyid[c.geom1]
                     body2 = self.sim.model.geom_bodyid[c.geom2]
                     if (
-                        c.geom1 in self.l_finger_geom_ids[arm]
+                        c.geom1 in self.l_finger_geom_ids[0][arm]
                         and body2 in self._object_body_ids
                     ):
                         touch_left_finger[body2] = True
                     if (
                         body1 in self._object_body_ids
-                        and c.geom2 in self.l_finger_geom_ids[arm]
+                        and c.geom2 in self.l_finger_geom_ids[0][arm]
                     ):
                         touch_left_finger[body1] = True
 
                     if (
-                        c.geom1 in self.r_finger_geom_ids[arm]
+                        c.geom1 in self.r_finger_geom_ids[0][arm]
                         and body2 in self._object_body_ids
                     ):
                         touch_right_finger[body2] = True
                     if (
                         body1 in self._object_body_ids
-                        and c.geom2 in self.r_finger_geom_ids[arm]
+                        and c.geom2 in self.r_finger_geom_ids[0][arm]
                     ):
                         touch_right_finger[body1] = True
 
@@ -1914,7 +1921,8 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             self._destroy_viewer()
             if self._camera_ids[0] == 0:
                 # front view
-                self._set_camera_position(self._camera_ids[0], [0.0, -0.7, 0.5])
+                self._set_camera_position(self._camera_ids[0], [0.0, -1.0, 0.5])
+                # self._set_camera_position(self._camera_ids[0], [0.0, -1.0, 1.6])
                 self._set_camera_rotation(self._camera_ids[0], [0.0, 0.0, 0.0])
             elif self._camera_ids[0] == 1:
                 # side view
@@ -2054,12 +2062,13 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         """
         floor_full_size = (2.0, 1.0)
         floor_friction = (2.0, 0.005, 0.0001)
+        floor_pos = [0.2, 0.0]
         # TODO: table arena
         from .models.arenas import FloorArena
         from .models.arenas import TableArena
 
         self.mujoco_arena = FloorArena(
-            floor_full_size=floor_full_size, floor_friction=floor_friction
+            floor_pos=floor_pos, floor_full_size=floor_full_size, floor_friction=floor_friction
         )
         # self.mujoco_arena = TableArena(
         #     table_full_size=(1.5, 1.0, 0.677045), table_friction=floor_friction
