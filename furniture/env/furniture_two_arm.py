@@ -967,7 +967,6 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         for smoother visual connection.
         """
 
-
         if part1 is not None:
             body1_ids = [
                 self.sim.model.body_name2id(obj_name)
@@ -1027,7 +1026,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                 if site1_pairs == site2_pairs[::-1]:
                     # TODO: the align condition is unnecessary for wire insertion
                     if True:
-                        alinged = self._is_aligned(site1_name, site2_name)
+                        aligned = self._is_aligned(site1_name, site2_name)
                     # if self._is_aligned(site1_name, site2_name):
                         logger.debug(
                             f"connect {site1_name} and {site2_name}, {self._connect_step}/{self._num_connect_steps}"
@@ -1078,7 +1077,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                             return False
                         else:
                             # self._connect(site1_id, site2_id, self._auto_align)
-                            self._connect(site1_id, site2_id, auto_align=False)
+                            self._connect(site1_id, site2_id, auto_align=True)
                             self._connect_step = 0
                             self.next_pos = self.next_rot = None
                             return True
