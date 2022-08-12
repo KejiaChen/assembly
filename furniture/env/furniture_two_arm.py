@@ -687,9 +687,9 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
 
         elif mode == "human" and not self._unity:
             if platform != "win32":
-                self._get_viewer().render()
+                self._viewer.render()
 
-        return None
+        # return None
 
     def _destroy_viewer(self):
         """
@@ -717,6 +717,11 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             self._viewer.cam.type = mujoco_py.generated.const.CAMERA_FIXED
             # TODO: DEBUGGING
             self._viewer.vopt.geomgroup[0] = 0
+
+            # make sure mujoco-py doesn't block rendering frames
+            # (see https://github.com/StanfordVL/robosuite/issues/39)
+            self._viewer._render_every_frame = True
+
             self._viewer_reset()
         return self._viewer
 
@@ -960,6 +965,85 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                 # set up ik controller
                 self._controller.sync_state()
 
+    def _connect_ball(self, site1_id, site2_id, auto_align=True):
+        """
+        Connects two sites together with connect constraint.
+        Makes the two objects are within boundaries
+        """
+        self._connected_sites.add(site1_id)
+        self._connected_sites.add(site2_id)
+        self._site1_id = site1_id
+        self._site2_id = site2_id
+        site1 = self.sim.model.site_names[site1_id]
+        site2 = self.sim.model.site_names[site2_id]
+
+        logger.debug("**** connect {} and {}".format(site1, site2))
+
+        body1_id = self.sim.model.site_bodyid[site1_id]
+        body2_id = self.sim.model.site_bodyid[site2_id]
+        body1 = self.sim.model.body_id2name(body1_id)
+        body2 = self.sim.model.body_id2name(body2_id)
+
+        # remove collision
+        group1 = self._find_group(body1)
+        group2 = self._find_group(body2)
+        for geom_id, body_id in enumerate(self.sim.model.geom_bodyid):
+            body_name = self.sim.model.body_names[body_id]
+            if body_name in self._object_names:
+                group = self._find_group(body_name)
+                if group in [group1, group2]:
+                    if self.sim.model.geom_contype[geom_id] != 0:
+                        self.sim.model.geom_contype[geom_id] = (
+                            (1 << 30) - 1 - (1 << (group1 + 1))
+                        )
+                        self.sim.model.geom_conaffinity[geom_id] = 1 << (group1 + 1)
+
+        # align site
+        if auto_align:
+            self._align_connectors(site1, site2, gravity=self._gravity_compensation)
+
+        # move furniture to collision-safe position
+        if self._agent_type == "Cursor":
+            self._stop_selected_objects()
+        self.sim.forward()
+        self.sim.step()
+
+        min_pos1, max_pos1 = self._get_bounding_box(body1)
+        min_pos2, max_pos2 = self._get_bounding_box(body2)
+        min_pos = np.minimum(min_pos1, min_pos2)
+        if min_pos[2] < 0:
+            offset = [0, 0, -min_pos[2]]
+            self._move_rotate_object(body1, offset, [0, 0, 0])
+            self._move_rotate_object(body2, offset, [0, 0, 0])
+
+        if self._agent_type == "Cursor":
+            self._stop_selected_objects()
+        self.sim.forward()
+        self.sim.step()
+
+        # activate weld
+        self._activate_weld(body1, body2)
+
+        # release cursor
+        if self._agent_type == "Cursor":
+            self._cursor_selected[1] = None
+
+        self._num_connected += 1
+        self._connected = True
+        self._connected_body1 = body1
+        self._connected_body1_pos = self._get_qpos(body1)[:3]
+        self._connected_body1_quat = self._get_qpos(body1)[3:]
+
+        # set next subtask
+        self._get_next_subtask()
+
+        # reset robot arm
+        if self._config.reset_robot_after_attach:
+            self._initialize_robot_pos()
+            if self._control_type in ["ik", "ik_quaternion"]:
+                # set up ik controller
+                self._controller.sync_state()
+
     def _try_connect(self, part1=None, part2=None):
         """
         Attempts to connect 2 parts. If they are correctly aligned,
@@ -1077,7 +1161,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                             return False
                         else:
                             # self._connect(site1_id, site2_id, self._auto_align)
-                            self._connect(site1_id, site2_id, auto_align=True)
+                            self._connect(site1_id, site2_id, auto_align=False)
                             self._connect_step = 0
                             self.next_pos = self.next_rot = None
                             return True
@@ -1273,6 +1357,11 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         site1_xpos[3:] = self._target_connector_xquat
         self._move_site_to_target(connector2, site1_xpos, gravity)
 
+        # # TODO: Moves connector1 to connector 2
+        # site2_xpos = self._site_xpos_xquat(connector2)
+        # site2_xpos[3:] = self._target_connector_xquat
+        # self._move_site_to_target(connector1, site2_xpos, gravity)
+
     def _move_site_to_target(self, site, target_qpos, gravity=1):
         """
         Moves target site towards target quaternion / position
@@ -1367,7 +1456,9 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                         touch_right_finger[body1] = True
 
                 for body_id in self._object_body_ids:
+                    # TODO: why is touch necessary?
                     if touch_left_finger[body_id] and touch_right_finger[body_id]:
+                    # if True:
                         logger.debug("try connect")
                         result = self._try_connect(self.sim.model.body_id2name(body_id))
                         if result:
@@ -2001,6 +2092,8 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                 self.mujoco_robots[idx].add_gripper(self.mujoco_robots[idx].prefix+"right_hand", self.grippers[idx]["right"])
                 self.mujoco_robots[idx].set_base_xpos(robot_config["init_pos"])
                 self.mujoco_robots[idx].set_base_xquat(robot_config["init_quat"])
+
+                self.gripper_equality = self._objects.equality
 
             elif robot_config['agent_type'] == "Jaco":
                 from .models.robots import Jaco
@@ -2826,12 +2919,15 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             for i, (id1, id2) in enumerate(
                 zip(self.sim.model.eq_obj1id, self.sim.model.eq_obj2id)
             ):
-                object_name1 = self._object_body_id2name[id1]
-                object_name2 = self._object_body_id2name[id2]
-                if self._find_group(object_name1) != self._find_group(object_name2):
-                    self._subtask_part1 = self._object_name2id[object_name1]
-                    self._subtask_part2 = self._object_name2id[object_name2]
-                    return
+                if id1 in self._object_body_id2name:
+                    # exclude equality constrains of robotiq grippers
+                    object_name1 = self._object_body_id2name[id1]
+                    if id2 != 0:
+                        object_name2 = self._object_body_id2name[id2]
+                        if self._find_group(object_name1) != self._find_group(object_name2):
+                            self._subtask_part1 = self._object_name2id[object_name1]
+                            self._subtask_part2 = self._object_name2id[object_name2]
+                            return
         self._subtask_part1 = -1
         self._subtask_part2 = -1
 
@@ -3474,6 +3570,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                 gripper_action_in
             )
             action = np.concatenate([arm_action, gripper_action_actual])
+            action_dim = action.size
 
         elif self.robot_configs[idx]["agent_type"] == "Baxter":
             last = self.mujoco_robots[idx].dof  # Degrees of freedom in arm, i.e. 14
@@ -3492,11 +3589,10 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
 
         if self._rescale_actions:
             # rescale normalized action to control ranges
-            # TODO: each robot has 9 actuators
-            # TODO: DEBUG
+            # TODO: each robot has action_dim actuators
             # range_start = idx*(self.action_size+1)
             # range_end = (idx+1)*(self.action_size+1)
-            ctrl_range = self.sim.model.actuator_ctrlrange[0:9]
+            ctrl_range = self.sim.model.actuator_ctrlrange[0:action_dim]
             bias = 0.5 * (ctrl_range[:, 1] + ctrl_range[:, 0])
             weight = 0.5 * (ctrl_range[:, 1] - ctrl_range[:, 0])
             action = bias + weight * action

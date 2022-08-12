@@ -46,6 +46,8 @@ class MujocoXML(object):
         self.asset = self.create_default_element("asset")
         self.equality = self.create_default_element("equality")
         self.sensor = self.create_default_element("sensor")
+        self.sensor_dict = {}
+        self.sensor_index = 0
         self.contact = self.create_default_element("contact")
         self.default = self.create_default_element("default")
         self.tendon = self.create_default_element("tendon")
@@ -97,6 +99,12 @@ class MujocoXML(object):
             self.equality.append(one_equality)
         for one_sensor in other.sensor:
             self.sensor.append(one_sensor)
+            one_sensor_name = one_sensor.attrib["name"]
+            one_sensor_type = one_sensor.tag
+            self.sensor_dict[one_sensor_name] = []
+            for _ in range(self.sensor_table(one_sensor_type)):
+                self.sensor_dict[one_sensor_name].append(self.sensor_index)
+                self.sensor_index += 1
         for one_contact in other.contact:
             self.contact.append(one_contact)
         # for one_default in other.default:
@@ -160,6 +168,18 @@ class MujocoXML(object):
             if self.asset.find(pattern) is None:
                 self.asset.append(asset)
 
+    def merge_sensor(self, other):
+        for sensor in other.sensor:
+            sensor_name = sensor.attrib["name"]
+            sensor_type = sensor.tag
+            # Avoids duplication
+            if sensor_name not in self.sensor_dict:
+                self.sensor.append(sensor)
+                self.sensor_dict[sensor_name] = []
+                for _ in range(self.sensor_table(sensor_type)):
+                    self.sensor_dict[sensor_name].append(self.sensor_index)
+                    self.sensor_index += 1
+
     def get_children_names(self):
         if self.debug:
             print('Reading object xml')
@@ -188,6 +208,15 @@ class MujocoXML(object):
             else:
                 print('\t\t omitted', )
         return names
+
+    def sensor_table(self, tag):
+        if tag == 'touch':
+            axis = 1
+        elif tag == 'force':
+            axis = 3
+        elif tag == "torque":
+            axis = 3
+        return axis
 
     # @property
     # def name(self):

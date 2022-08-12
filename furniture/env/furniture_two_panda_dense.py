@@ -151,7 +151,7 @@ class FurnitureTwoPandaDenseRewardEnv(FurnitureTwoPandaEnv):
         # TODO: reward depends only on robot0
         subtask_step = self._subtask_step
 
-        self._leg, self._table = self._recipe["recipe"][subtask_step]
+        self._leg, self._table, task_type = self._recipe["recipe"][subtask_step]
         self._leg_site, self._table_site = self._site_recipe[subtask_step][:2]
         if len(self._site_recipe[subtask_step]) == 3:
             self._leg_table_angle = self._site_recipe[subtask_step][2]
@@ -178,10 +178,12 @@ class FurnitureTwoPandaDenseRewardEnv(FurnitureTwoPandaEnv):
         # reward depends only on robot0
         eef_pos = self._get_pos(self.grippers[0]["right"].prefix + "griptip_site")
 
-        if self._config.reset_robot_after_attach:
-            self._phase_i = 1
-        else:
-            self._phase_i = 0
+        # TODO: correct phase i
+        self._phase_i = 1
+        # if self._config.reset_robot_after_attach:
+        #     self._phase_i = 1
+        # else:
+        #     self._phase_i = 0
 
         if (
             "grip_init_pos" in self._recipe
@@ -395,7 +397,8 @@ class FurnitureTwoPandaDenseRewardEnv(FurnitureTwoPandaEnv):
                 # discourage staying in algined mode
                 phase_bonus -= self._leg_fine_aligned * self._aligned_bonus_coef
 
-                self._phase_i = 0
+                # TODO: continue after connect instead of new init
+                self._phase_i = 1
                 logger.info("*** CONNECTED w/o move_leg_fine!")
                 # update reward variables for next attachment
                 done = self._success = self._set_next_subtask()
@@ -552,7 +555,8 @@ class FurnitureTwoPandaDenseRewardEnv(FurnitureTwoPandaEnv):
                 # discourage staying in algined mode
                 phase_bonus -= self._leg_fine_aligned * self._aligned_bonus_coef
 
-                self._phase_i = 0
+                # TODO: continue after connect
+                self._phase_i = 1
                 logger.info("*** CONNECTED!")
                 # update reward variables for next attachment
                 done = self._success = self._set_next_subtask()

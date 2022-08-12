@@ -27,12 +27,16 @@ class FloorTask(Task):
         super().__init__()
 
         self.merge_arena(mujoco_arena)
-        for mujoco_robot in mujoco_robots:
-            self.merge_robot(mujoco_robot)
+        if type(mujoco_robots) is list:
+            for mujoco_robot in mujoco_robots:
+                self.merge_robot(mujoco_robot)
+        else:
+            self.merge_robot(mujoco_robots)
         # self.merge_robot(mujoco_robot)
         self.merge_objects(mujoco_objects)
         self.merge_equality(mujoco_equality)
         self.merge_tendon(mujoco_tendon)
+
         initializer = UniformRandomSampler(rng,
            r_xyz=furn_xyz_rand, r_rot=furn_rot_rand, init_qpos=init_qpos)
 
@@ -69,15 +73,17 @@ class FloorTask(Task):
 
         for obj_name, obj_mjcf in mujoco_objects.items():
             self.merge_asset(obj_mjcf)
+            self.merge_sensor(obj_mjcf)
             # Load object
             obj = obj_mjcf.get_collision(name=obj_name, site=True)
             obj.append(new_joint(name=obj_name, type="free", damping="0.0001"))
             self.objects.append(obj)
             self.worldbody.append(obj)
-
-            self.max_horizontal_radius = max(
-                self.max_horizontal_radius, obj_mjcf.get_horizontal_radius()
-            )
+            # unable all collision for soft objects
+            if not obj_name.startswith("wire"):
+                self.max_horizontal_radius = max(
+                    self.max_horizontal_radius, obj_mjcf.get_horizontal_radius()
+                )
 
     def merge_equality(self, equality):
         """Adds equality constraints  to the MJCF model."""
@@ -92,4 +98,7 @@ class FloorTask(Task):
     def place_objects(self, fixed_parts=None):
         """Places objects randomly until no collisions or max iterations hit."""
         return self.initializer.sample(placed_objects_orig=fixed_parts)
+
+    # def read_sensor(self):
+
 

@@ -81,12 +81,15 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
         self._phase = None
         self._num_connected_prev = 0
         self._part_success = False
-        self._phases_gen = [
+        self.skill_list = ["insertion, "]
+        insertion_phases_gen = [
             "init_grip",
             "xy_move_g",
             "align_g",
+
             "z_move_g_1",
             "z_move_g_2",
+            # "buffer",
             "move_waypoints",
             # "xy_move_t",
             "align_conn",
@@ -99,23 +102,36 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
             # "follow",
             "z_move_conn_fine",
             "move_nogrip_safepos",
+            "straighten",
+            "align_g1",
+            "xy_move_wire",
+            "xy_fit_wire",
             "part_done",
         ]
-        self._phases_to_phase_i = {
-            None: 0,
-            "init_grip": 0,
-            "xy_move_g": 1,
-            "align_g": 1,
-            "z_move_g": 2,
-            "move_waypoints": 4,
-            "align_conn": 5,
-            "xy_move_conn": 6,
-            "z_move_conn": 6,
-            "align_conn_fine": 7,
-            "z_move_conn_fine": 7,
-            "move_nogrip_safepos": 0,
-            "part_done": 0,
-        }
+
+        fit_phases_gen = [
+            "straighten",
+            "align_g1",
+            "xy_move_wire",
+            "xy_fit_wire",
+        ]
+
+        self.skill_library = {"insertion": insertion_phases_gen}
+        # self._phases_to_phase_i = {
+        #     None: 0,
+        #     "init_grip": 0,
+        #     "xy_move_g": 1,
+        #     "align_g": 1,
+        #     "z_move_g": 2,
+        #     "move_waypoints": 4,
+        #     "align_conn": 5,
+        #     "xy_move_conn": 6,
+        #     "z_move_conn": 6,
+        #     "align_conn_fine": 7,
+        #     "z_move_conn_fine": 7,
+        #     "move_nogrip_safepos": 0,
+        #     "part_done": 0,
+        # }
 
         self._phase_noise = {
             #   phase      : (min_val, max_val, dimensions)
@@ -128,11 +144,23 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
         }
         self.reset()
 
+
+    def _read_sensor(self, obj_site):
+        """
+        Returns if left, right fingers contact with obj
+        """
+        self.sensor_data = self.sim.data.sensordata
+        obj_sensor_idx = self.mujoco_model.sensor_dict[obj_site]
+        data = self.sensor_data[obj_sensor_idx]
+        return data
+
     def _get_random_noise(self):
         noise = {}
         for phase, val in self._phase_noise.items():
             minimum, maximum, size = val
-            noise[phase] = self._rng.uniform(low=minimum, high=maximum, size=size)
+            # noise[phase] = self._rng.uniform(low=minimum, high=maximum, size=size)
+            # TODO: debug with no noise
+            noise[phase] = None
         return noise
 
     def _norm_rot_action(self, action, cap=1):
@@ -362,7 +390,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
         d = target_pos - cur_pos
         if noise is not None:
             d += noise
-        print("fine z dist", d)
+        # print("fine z dist", d)
         if abs(d[0]) < epsilon:
             d[0] = 0
         if abs(d[1]) < epsilon:
@@ -409,6 +437,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
         safepos_idx = 0
         safepos = []
         pbar = tqdm(total=n_demos)
+        num = 0
         # two_finger gripper sites, as defined in gripper xml
         # TODO: for panda gripper
         # griptip_site = "griptip_site"
@@ -463,12 +492,16 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                 else:
                     self._phase_num = 1
 
+                # self._phase = self._phases_gen[self._phase_num]
+
+                gbody_name, tbody_name, task_name = p["recipe"][j]
+                self._phases_gen = self.skill_library[task_name]
                 self._phase = self._phases_gen[self._phase_num]
 
-                gbody_name, tbody_name = p["recipe"][j]
                 # use conn_sites in site_recipe, other dynamically get closest/furthest conn_site from gripper
                 if "site_recipe" in p:
                     gconn, tconn = p["site_recipe"][j][:2]
+                    print("hole_site", self._get_pos(tconn))
                     # gconn_inverse = 'leg-table-inverse,0,90,180,270,conn_site2'
                 else:
                     gconn_names, tconn_names = self.get_conn_sites(
@@ -488,14 +521,15 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                     z_conn_dist = z_conn_dist[j]
 
                 if self._config.render:
+                    self._get_viewer()
                     self.render()
-                    self.render()
-                    # TODO: debugging
+                    # # TODO: debugging
                     # while True:
                     #     zero_action = np.zeros((8,))
                     #     ob, reward, _, info = self.step([zero_action, zero_action])
                     #     self.render()
-                    #     print("hole_pos", self._get_pos('hole-wire,0,90,180,270,conn_site1'))
+                    # #     print("hole_pos", self._get_pos('hole-wire,0,90,180,270,conn_site1'))
+                    # # TODO: debugging
                 if self._config.record_vid:
                     self.vid_rec.capture_frame(self.render("rgb_array")[0])
 
@@ -549,7 +583,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                             grip_xyz_pos2, pre_xyz_pos2, p["eps"], noise=np.array([0, 0, 0])
                         )
 
-                        print("action 2", action_robot2)
+                        # print("action 2", action_robot2)
 
                         if all(action[0:3]==0) and all(action_robot2[0:3]==0):
                             self._phase_num += 1
@@ -678,7 +712,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                                 # TODO: what is the meaning of z_move_g_prev?
                                 z_move_g_prev[idx] = grip_tip[2] + ground_offset
 
-                            if abs(d[2]) > p["eps"] and grip_tip[2] < z_move_g_prev[idx]:
+                            if abs(d[2]) > p["eps_fine"] and grip_tip[2] < z_move_g_prev[idx]:
                             # if abs(d[2]) > p["eps"] and grip_tip[2] > 0:
                                 # distance is too large to grasp
                                 # keep moving in xyz
@@ -701,6 +735,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                         if action[6] == 1 and action_robot2[6] == 1:
                         # if action[6] == 1:
                             self._phase_num += 1
+                            self.count = 0
                             print("the next phase", self._phases_gen[self._phase_num])
                             if p["waypoints"][j] is not None:
                                 gripbase_pos = self._get_pos(gripbase_site[0])
@@ -719,6 +754,14 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                                     # safepos.append([gripbase_pos + pos, gripbase_pos2 + pos + height_diff + height_add_array])
                                     safepos.append([gripbase_pos + pos, safe_pos2])
                                     print("pick up", safepos[-1])
+
+                    elif self._phase == "buffer":
+                        action[6] = 1
+                        action_robot2[6] = 1
+                        self.count += 1
+                        if self.count > 5:
+                            self._phase_num += 1
+                            print("the next phase", self._phases_gen[self._phase_num])
 
                     elif self._phase == "move_waypoints":
                         action[6] = 1
@@ -788,7 +831,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                                 )
                                 t_xy_fwd = t_fwd[0:2]
                             xy_ac = self.align2D(g_xy_fwd, t_xy_fwd, p["rot_eps"])
-                            print("xy_ac", xy_ac)
+                            # print("xy_ac", xy_ac)
                             # # TODO: contact face is a circular face regardless of xy_ac
                             xy_ac = 0
                             if xy_ac == 0:
@@ -821,38 +864,39 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                         # follow translation:
                         # action_robot2[0:3] = copy.deepcopy(action[0:3])
 
-                    elif self._phase == "straighten":
-                        action[6] = 1
-                        action_robot2[6] = 1
-                        # wire_end_1 = self._get_pos("wire1_end")
-                        # wire_end_2 = self._get_pos("wire2_end")
-                        # wire_end_dist = np.linalg.norm(wire_end_2 - wire_end_1)
-                        # wire_end_straighten =
-                        grip_pos = self._get_pos(grip_site[0])
-                        grip_pos2 = self._get_pos(grip_site[1])
-                        grip_vec = (grip_pos2 - grip_pos)/np.linalg.norm(grip_pos2 - grip_pos)
-                        straighten_pos = grip_pos + 0.4*grip_vec
-                        # TODO: keep two grippers within a certain distance (max=0.45)
-                        grip_dist = np.linalg.norm(grip_pos2 - grip_pos)
-                        # if grip_dist < 0.3:
-                        if True:
-                            # TODO: change straighten_pos2
-                            straighten_pos2 = np.array([align_dist_limit, 0, 0]) + grip_pos
-                            # gripbase_pos = self._get_pos(gripbase_site[0])
-                            # gripbase_pos2 = self._get_pos(gripbase_site[1])
-                            # straighten_pos2 = np.array([trans_dist_limit, 0, 0]) + gripbase_pos
-                            action_robot2[0:3] = self.trans_scaling * self.move_xyz(
-                                grip_pos2,
-                                self.straighten_pos,
-                                p["eps"],
-                                noise=noise[self._phase],
-                            )
-                            if not np.any(action_robot2[0:3]):
-                                self._phase_num += 1
-                                print("the next phase", self._phases_gen[self._phase_num])
-                        else:
-                            self._phase_num += 1
-                            print("the next phase", self._phases_gen[self._phase_num])
+                    # elif self._phase == "straighten":
+                    #     action[6] = -1
+                    #     action_robot2[6] = 1
+                    #     # wire_end_1 = self._get_pos("wire1_end")
+                    #     # wire_end_2 = self._get_pos("wire2_end")
+                    #     # wire_end_dist = np.linalg.norm(wire_end_2 - wire_end_1)
+                    #     # wire_end_straighten =
+                    #     grip_pos = self._get_pos(grip_site[0])
+                    #     grip_pos2 = self._get_pos(grip_site[1])
+                    #     grip_vec = (grip_pos2 - grip_pos)/np.linalg.norm(grip_pos2 - grip_pos)
+                    #     straighten_pos = grip_pos + 0.42*grip_vec
+                    #     # TODO: keep two grippers within a certain distance (max=0.45)
+                    #     grip_dist = np.linalg.norm(grip_pos2 - grip_pos)
+                    #     # if grip_dist < 0.3:
+                    #     if True:
+                    #         # TODO: change straighten_pos2
+                    #         straighten_pos2 = np.array([align_dist_limit, 0, 0]) + grip_pos
+                    #         # gripbase_pos = self._get_pos(gripbase_site[0])
+                    #         # gripbase_pos2 = self._get_pos(gripbase_site[1])
+                    #         # straighten_pos2 = np.array([trans_dist_limit, 0, 0]) + gripbase_pos
+                    #         action_robot2[0:3] = self.trans_scaling * self.move_xyz(
+                    #             grip_pos2,
+                    #             self.straighten_pos,
+                    #             p["eps"],
+                    #             noise=noise[self._phase],
+                    #         )
+                    #         print("action", action)
+                    #         if not np.any(action_robot2[0:3]):
+                    #             self._phase_num += 1
+                    #             print("the next phase", self._phases_gen[self._phase_num])
+                    #     else:
+                    #         self._phase_num += 1
+                    #         print("the next phase", self._phases_gen[self._phase_num])
 
                     elif self._phase == "xy_move_conn":
                         action[6] = 1
@@ -977,7 +1021,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                         # action_robot2[2] = self.move_xy(
                         #     grip_pos_xz2, rotated_grip_pos_xz2, p["eps"]
                         # )[1]
-                        print("rot_action", rot_action)
+                        # print("rot_action", rot_action)
                         if rot_action == [0, 0, 0]:
                             # g_xy_fwd = self._get_forward_vector(gconn)[0:2]
                             # if t_fwd is None:
@@ -987,7 +1031,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                             #     t_xy_fwd = t_fwd[0:2]
                             # xy_ac = self.align2D(g_xy_fwd, t_xy_fwd, p["rot_eps_fine"])
                             xy_ac = 0
-                            print("xyac", xy_ac)
+                            # print("xyac", xy_ac)
                             if xy_ac == 0:
                                 # must be finely aligned rotationally and translationally to go to next phase
                                 gconn_pos = self.sim.data.get_site_xpos(gconn)
@@ -1061,7 +1105,7 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                         )
                         # follow
                         action_robot2[0:3] = copy.deepcopy(action[0:3])
-                        print("action", action[0:3])
+                        # print("action", action[0:3])
 
                         g_up = self._get_up_vector(gconn)
                         t_up = self._get_up_vector(tconn)
@@ -1088,8 +1132,25 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                         action[3:6] = [0, 0, 0]
                         if not np.any(action[0:3]):
                             # action [7]: connect
+                            action[6] = -1
                             action[7] = 1
                             self._phase_num += 1
+                            # # next straighten pos
+                            grip_pos = self._get_pos(grip_site[0])
+                            grip_pos2 = self._get_pos(grip_site[1])
+                            grip_vec = (grip_pos2 - grip_pos) / np.linalg.norm(grip_pos2 - grip_pos)
+
+                            wire1_end_site = "wire1_end"
+                            wire1_end_pos_xy = self._get_pos(wire1_end_site)[0:2]
+                            clip_center_site = "clip-wire,reach_site1"
+                            clip_center_pos_xy = self._get_pos(clip_center_site)[0:2]
+                            fit_vec = (clip_center_pos_xy - wire1_end_pos_xy) / np.linalg.norm(wire1_end_pos_xy - clip_center_pos_xy)
+
+                            straighten_dir = np.array([fit_vec[0], fit_vec[1], 1.0])
+                            straighten_vec = straighten_dir/np.linalg.norm(straighten_dir)
+                            # self.straighten_pos = grip_pos + 0.5 * grip_vec
+                            self.straighten_pos_xy = wire1_end_pos_xy + 0.44 * fit_vec
+                            self.straighten_pos = self._get_pos(wire1_end_site) + 0.44 * straighten_vec
                             if self._config.reset_robot_after_attach:
                                 self._phase_num += 1
                             else:
@@ -1097,12 +1158,18 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                                 safepos_idx = 0
                                 safepos.clear()
                                 if p["nogrip_safepos"][j] is not None:
-                                    for pos in p["nogrip_safepos"][j]:
-                                        safepos.append(gripbase_pos + pos)
-                                        print("after attach", safepos[-1])
+                                    safepos.append(grip_pos + np.array([0, 0, 0]))
+                                    # grip_pos = self._get_pos(grip_site[0])
+                                    # grip_pos2 = self._get_pos(grip_site[1])
+                                    # grip_vec = (grip_pos2 - grip_pos) / np.linalg.norm(grip_pos2 - grip_pos)
+                                    # self.straighten_pos = grip_pos + 0.5 * grip_vec
+                                    # for pos in p["nogrip_safepos"][j]:
+                                    #     safepos.append(gripbase_pos + pos)
+                                    #     print("after attach", safepos[-1])
 
                     elif self._phase == "move_nogrip_safepos":
                         action[6] = -1
+                        action_robot2[6] = 1
                         if p["nogrip_safepos"][j] is None or (
                             p["nogrip_safepos"][j]
                             and safepos_idx >= len(p["nogrip_safepos"][j])
@@ -1112,15 +1179,172 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                             self._phase_num += 1
                         else:
                             gripbase_pos = self._get_pos(gripbase_site[0])
+                            grip_pos = self._get_pos(grip_site[0])
+
                             action[0:3] = self.trans_scaling*self.move_xyz(
-                                gripbase_pos,
+                                grip_pos,
                                 safepos[safepos_idx],
                                 p["eps"],
                                 noise=noise[self._phase],
                             )
-                            action_robot2[0:3] = copy.deepcopy(action[0:3])
+                            # action_robot2[0:3] = copy.deepcopy(action[0:3])
+                            # print(action[0:3])
                             if not np.any(action[0:3]):
-                                safepos_idx += 1
+                                # safepos_idx += 1
+                                self._phase_num += 1
+                                print("the next phase", self._phases_gen[self._phase_num])
+
+                    elif self._phase == "straighten":
+                        action[6] = 0.2
+                        action_robot2[6] = 1
+                        # wire_end_1 = self._get_pos("wire1_end")
+                        # wire_end_2 = self._get_pos("wire2_end")
+                        # wire_end_dist = np.linalg.norm(wire_end_2 - wire_end_1)
+                        # wire_end_straighten =
+                        g_pos = self._get_leg_grasp_pos()
+                        grip_pos = self._get_pos(grip_site[0])
+                        grip_pos2 = self._get_pos(grip_site[1])
+                        grip_vec = (grip_pos2 - grip_pos)/np.linalg.norm(grip_pos2 - grip_pos)
+                        straighten_pos = grip_pos + 0.4*grip_vec
+                        # TODO: keep two grippers within a certain distance (max=0.45)
+                        grip_dist = np.linalg.norm(grip_pos2 - grip_pos)
+                        # if grip_dist < 0.3:
+                        if True:
+                            # TODO: change straighten_pos2
+                            straighten_pos2 = np.array([align_dist_limit, 0, 0]) + grip_pos
+                            # gripbase_pos = self._get_pos(gripbase_site[0])
+                            # gripbase_pos2 = self._get_pos(gripbase_site[1])
+                            # straighten_pos2 = np.array([trans_dist_limit, 0, 0]) + gripbase_pos
+                            # action_robot2[0:3] = self.trans_scaling * self.move_xyz(
+                            action_robot2[0:3] = self.move_xyz(
+                                grip_pos2,
+                                self.straighten_pos,
+                                p["eps"],
+                                noise=noise[self._phase],
+                            )
+                            # action_robot2[0:2] = self.move_xy(
+                            #     grip_pos2[0:2], self.straighten_pos_xy, p["eps"]
+                            # )
+                            # print("action", action)
+                            # print("action2", action_robot2)
+                            if not np.any(action_robot2[0:3]):
+                                self._phase_num += 1
+                                print("the next phase", self._phases_gen[self._phase_num])
+                        else:
+                            self._phase_num += 1
+                            print("the next phase", self._phases_gen[self._phase_num])
+
+                    elif self._phase == "align_g1":
+                        action[6] = 0.2
+                        action_robot2[6] = 1
+                        rot_action = []
+                        if grip_angles is None or grip_angles[j] is not None:
+                                idx = 0
+                                # point gripper z downwards
+                                g_l, g_r = f"{'B4'}_ltgt_site{0}", f"{'wire2'}_ltgt_site{0}"
+                                vec_g = self._get_pos(g_r) - self._get_pos(g_l)
+
+                                # align gripper fingers with grip sites
+                                gripfwd_xy = self._get_forward_vector(grip_site[idx])[0:2]
+                                gvec_xy = self._get_leg_grasp_vector()[0:2]
+                                # xy_ac: rotation angle around z axis
+                                # print("gvec_xy", gvec_xy)
+                                xy_ac = self.align_gripsites(
+                                    gripfwd_xy, gvec_xy, p["rot_eps"]
+                                )
+                                # xy_ac = self.align2D(gripfwd_xy, gvec_xy, p['rot_eps'])
+                                yz_align_g = np.array([-vec_g[2], vec_g[1]])
+                                xz_align_g = np.array([vec_g[2], -vec_g[0]])
+                                gripvec = self._get_up_vector(grip_site[idx])
+                                # up vector should in z direction
+                                yz_ac = self.align2D(
+                                    gripvec[1:3], align_g_tgt, p["rot_eps"]
+                                )
+                                xz_ac = self.align2D(
+                                    gripvec[0::2], xz_align_g, p["rot_eps"]
+                                )
+                                rot_action = [xy_ac, yz_ac, xz_ac]
+                                print("rotation", rot_action)
+                                # if xy_ac == 0:
+                                if rot_action == [0, 0, 0]:
+                                    grip_pos = self._get_pos(grip_site[idx])[0:2]
+                                    g_pos = self._get_leg_grasp_pos()
+                                    # action[0:2] = self.move_xy(
+                                    #     grip_pos, g_pos[0:2], p["eps"]
+                                    # )
+                                else:
+                                    # panda: smaller angular velocity
+                                    action[3:6] = [xy_ac, yz_ac, xz_ac]
+                        if all(action[0:6] == 0):
+                                self._phase_num += 1
+                                print("the next phase", self._phases_gen[self._phase_num])
+
+                    elif self._phase == "xy_move_wire":
+                        action[6] = 0.2
+                        action_robot2[6] = 1
+                        # grip_xy_pos = self._get_pos(grip_site[0])[0:2]
+                        # g_xy_pos = self._get_leg_grasp_pos()[0:2]
+                        # action[0:2] = self.move_xy(
+                        #     grip_xy_pos, g_xy_pos, p["eps"], noise=noise[self._phase]
+                        # )
+
+                        grip_xyz_pos = self._get_pos(grip_site[0])
+                        # TODO: integrate get leg grasp pos
+                        g_l, g_r = f"{'B4'}_ltgt_site{0}", f"{'B4'}_rtgt_site{0}"
+                        g_xyz_pos = (self._get_pos(g_l) + self._get_pos(g_r)) / 2
+                        pre_xyz_pos = g_xyz_pos + np.array([0, 0, 0.05])
+                        action[0:3] = self.move_xyz(
+                            grip_xyz_pos, pre_xyz_pos, p["eps"], noise=np.array([0, 0, 0])
+                        )
+                        # print("action", action)
+                        if all(action[0:3] == 0):
+                            self._phase_num += 1
+                            print("the next phase", self._phases_gen[self._phase_num])
+
+                    elif self._phase == "xy_fit_wire":
+                        action[6] = 1
+                        action_robot2[6] = 1
+                        # grip_xy_pos = self._get_pos(grip_site[0])[0:2]
+                        # g_xy_pos = self._get_leg_grasp_pos()[0:2]
+                        # action[0:2] = self.move_xy(
+                        #     grip_xy_pos, g_xy_pos, p["eps"], noise=noise[self._phase]
+                        # )
+
+                        grip_xyz_pos = self._get_pos(grip_site[0])
+                        treach_pos = self.sim.data.get_site_xpos("clip-wire,reach_site1")
+                        # TODO: integrate get leg grasp pos
+                        g_l, g_r = f"{'B4'}_ltgt_site{0}", f"{'B4'}_rtgt_site{0}"
+                        g_xyz_pos = (self._get_pos(g_l) + self._get_pos(g_r)) / 2
+                        # pre_xyz_pos = g_xyz_pos + np.array([0, 0, 0.05])
+                        # action[0:3] = self.move_xyz(
+                        #     grip_xyz_pos, pre_xyz_pos, p["eps"], noise=np.array([0, 0, 0])
+                        # )
+                        action[0:2] = self.move_xy(
+                            grip_xyz_pos[0:2],
+                            # gconn_inverse_pos,
+                            treach_pos[0:2],
+                            p["eps"],
+                            np.array([0, 0]),  # + p["z_finedist"],
+                        )
+                        # follow translation:
+                        action_robot2[0:2] = 0.5*copy.deepcopy(action[0:2])
+                        # print("action", action)
+                        if all(action[0:2] == 0):
+                            action[0:3] = self.move_xyz(
+                                grip_xyz_pos[0:3],
+                                # gconn_inverse_pos,
+                                treach_pos[0:3],
+                                p["eps"],
+                                np.array([0, 0, 0]),  # + p["z_finedist"],
+                            )
+                            # follow translation:
+                            action_robot2[0:3] = 0.5 * copy.deepcopy(action[0:3])
+                            touch = self._read_sensor("clip1_touch")[0]
+                            if touch > 0.2:
+                                print("touched")
+                            # if all(action[0:3] == 0):
+                                self._phase_num += 1
+                                print("the next phase", self._phases_gen[self._phase_num])
 
                     self._phase = self._phases_gen[self._phase_num]
                     action[0:3] = p["lat_magnitude"] * action[0:3]
@@ -1141,11 +1365,13 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                     ob, reward, _, info = self.step(total_action)
 
                     if self._config.render:
-                        self.render()
+                        self.render(mode="human")
                         # time buffer
-                        self.render()
+                        # self.render()
                     if self._config.record_vid:
                         self.vid_rec.capture_frame(self.render("rgb_array")[0])
+
+                    buffer = True
 
                     if self._episode_length > self._config.max_episode_steps:
                         logger.info(
@@ -1204,7 +1430,7 @@ def main():
     # parser.set_defaults(follow=True)
     parser.set_defaults(unity=False)
     parser.set_defaults(background='Simple')
-    parser.set_defaults(record_demo=True)
+    parser.set_defaults(record_demo=False)
     parser.set_defaults(record_vid=False)
 
     config, unparsed = parser.parse_known_args()

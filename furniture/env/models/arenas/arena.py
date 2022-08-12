@@ -101,6 +101,10 @@ class FloorArena(Arena):
         self.table_half_size = self.table_full_size/2
         self.leg_full_size = np.array([0.05, 0.677-self.table_full_size[2]])
         self.leg_half_size = self.leg_full_size/2
+        self.hori_prof_full_size = np.array([0.05, 0.05, 1.2])
+        self.hori_prof_half_size = self.hori_prof_full_size/2
+        self.vert_prof_full_size = np.array([floor_full_size[0], 0.05, 0.05])
+        self.vert_prof_half_size = self.vert_prof_full_size / 2
         self.floor_friction = floor_friction
         self.floor_pos = np.array([floor_pos[0], floor_pos[1], -0.025])
 
@@ -149,3 +153,27 @@ class FloorArena(Arena):
                                   self.floor_pos[2]-0.677 + self.leg_half_size[1]])
         self.leg4.set("pos", array_to_string(self.leg4_pos))
         self.leg4.set("size", array_to_string(self.leg_half_size))
+
+        self.prof1 = self.worldbody.find(".//geom[@name='shelf_profile1_visual']")
+        # self.leg1_pos = np.array([self.table_half_size[0], self.table_half_size[1], -0.677+self.leg_half_size[1]])
+        self.prof1_pos = np.array([self.floor_pos[0] + (self.table_half_size[0] - self.hori_prof_half_size[0]),
+                                  self.floor_pos[1] + self.table_half_size[1]/2 - self.hori_prof_half_size[1],
+                                  self.floor_pos[2] + self.hori_prof_half_size[2]])
+        self.prof1.set("pos", array_to_string(self.prof1_pos))
+        self.prof1.set("size", array_to_string(self.hori_prof_half_size))
+
+        self.prof2 = self.worldbody.find(".//geom[@name='shelf_profile2_visual']")
+        # self.leg1_pos = np.array([self.table_half_size[0], self.table_half_size[1], -0.677+self.leg_half_size[1]])
+        self.prof2_pos = np.array([self.floor_pos[0] - (self.table_half_size[0] - self.hori_prof_half_size[0]),
+                                   self.floor_pos[1] + self.table_half_size[1] / 2 - self.hori_prof_half_size[1],
+                                   self.floor_pos[2] + self.hori_prof_half_size[2]])
+        self.prof2.set("pos", array_to_string(self.prof2_pos))
+        self.prof2.set("size", array_to_string(self.hori_prof_half_size))
+
+        self.prof3 = self.worldbody.find(".//geom[@name='shelf_profile3_visual']")
+        # self.leg1_pos = np.array([self.table_half_size[0], self.table_half_size[1], -0.677+self.leg_half_size[1]])
+        self.prof3_pos = np.array([self.floor_pos[0],
+                                   self.floor_pos[1] + self.table_half_size[1] / 2 - self.hori_prof_half_size[1],
+                                   self.floor_pos[2] + self.hori_prof_full_size[2] - self.vert_prof_half_size[2]])
+        self.prof3.set("pos", array_to_string(self.prof3_pos))
+        self.prof3.set("size", array_to_string(self.vert_prof_half_size))

@@ -84,7 +84,10 @@ class UniformRandomSampler(ObjectPositionSampler):
             if obj_name not in self.init_qpos.keys():
                 self.init_qpos[obj_name] = Qpos(0, 0, 0, Quaternion())
             elif self._use_xml_init:
-                r = obj_mjcf.get_horizontal_radius(obj_name)
+                if not obj_name.startswith("wire"):
+                    r = obj_mjcf.get_horizontal_radius(obj_name)
+                else:
+                    r = None
                 preset_objects.append((obj_name, r, self.init_qpos[obj_name]))
                 remaining_objects.pop(obj_name)
         if len(remaining_objects) > 0:
@@ -157,7 +160,11 @@ class UniformRandomSampler(ObjectPositionSampler):
                 quat_arr[name] = qpos.quat
 
         for obj_name, obj_mjcf in objects.items():
-            obj_r = obj_mjcf.get_horizontal_radius(obj_name)
+            print(obj_name)
+            if not obj_name.startswith("wire"):
+                obj_r = obj_mjcf.get_horizontal_radius(obj_name)
+            else:
+                obj_r = None
             # bottom_offset = obj_mjcf.get_bottom_offset(obj_name)
             success = False
             for i in range(10000):  # 1000 retries
@@ -169,11 +176,12 @@ class UniformRandomSampler(ObjectPositionSampler):
                 for po_name, po_r, qpos in placed_objects:
                     po_x = qpos.x
                     po_y = qpos.y
-                    if np.linalg.norm([obj_x - po_x, obj_y - po_y], 2) <= po_r + obj_r:
-                        location_valid = False
-                        print("objname", obj_name)
-                        print("poame", po_name)
-                        break
+                    if obj_r is not None and po_r is not None:
+                        if np.linalg.norm([obj_x - po_x, obj_y - po_y], 2) <= po_r + obj_r:
+                            location_valid = False
+                            print("objname", obj_name)
+                            print("poame", po_name)
+                            break
 
                 if location_valid:
                     pos = self.table_top_offset + np.array([obj_x, obj_y, obj_z])
