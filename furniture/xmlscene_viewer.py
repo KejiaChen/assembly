@@ -12,7 +12,8 @@ XML_IKEA_TABLE = '/home/kejia/Documents/assembly/furniture/env/models/assets/obj
 XML_PANDA_GRIPPER = '/home/kejia/Documents/assembly/furniture/env/models/assets/grippers/panda_gripper.xml'
 XML_ROBOTIQ_GRIPPER = '/home/kejia/Documents/assembly/furniture/env/models/assets/grippers/robotiq_gripper.xml'
 XML_SAWYER_GRIPPER = '/home/kejia/Documents/assembly/furniture/env/models/assets/grippers/two_finger_gripper.xml'
-XML_WIRE = '/home/kejia/Documents/assembly/furniture/env/models/assets/objects/wire_insertion_parallel.xml'
+XML_WIRE = '/home/kejia/Documents/assembly/furniture/env/models/assets/objects/wire_insertion.xml'
+XML_WIRE_PARALLEL = '/home/kejia/Documents/assembly/furniture/env/models/assets/objects/wire_insertion_parallel.xml'
 XML_CHAIR = '/home/kejia/Documents/assembly/furniture/env/models/assets/objects/swivel_chair_0700.xml'
 XML_PANDA = '/home/kejia/Documents/assembly/furniture/env/models/assets/robots/panda/robot.xml'
 XML_ENV = '/home/kejia/Documents/assembly/furniture/env/models/assets/arenas/floor_arena.xml'
@@ -40,7 +41,7 @@ def print_box_xpos(sim):
 
 # Creating the rope
 # model = load_model_from_xml(MODEL_XML)
-model = mujoco_py.load_model_from_path(XML_ROBOTIQ_GRIPPER)
+model = mujoco_py.load_model_from_path(XML_WIRE)
 sim = MjSim(model)
 viewer = MjViewer(sim)
 viewer.vopt.geomgroup[0] = 0
