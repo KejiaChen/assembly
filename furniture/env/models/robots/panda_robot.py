@@ -85,4 +85,9 @@ class Panda(Robot):
     @property
     def _joints(self):
         return [self.name+"_joint{}".format(x) for x in range(1, 8)]
-
+    
+    def get_base_xpos(self):
+        node = self.worldbody.find("./body[@name='{}']".format(self.name+"_link0"))
+        pos_string = node.attrib['pos']
+        poses = pos_string.split(" ")
+        return poses

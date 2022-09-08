@@ -16,7 +16,7 @@ class FloorTask(Task):
     """
 
     def __init__(self, mujoco_arena, mujoco_robots, mujoco_objects, \
-                mujoco_equality, mujoco_tendon, furn_xyz_rand, furn_rot_rand, rng, init_qpos):
+                mujoco_equality, mujoco_tendon, mujoco_default, furn_xyz_rand, furn_rot_rand, rng, init_qpos):
         """
         Args:
             mujoco_arena: MJCF model of robot workspace
@@ -36,6 +36,7 @@ class FloorTask(Task):
         self.merge_objects(mujoco_objects)
         self.merge_equality(mujoco_equality)
         self.merge_tendon(mujoco_tendon)
+        self.merge_default(mujoco_default)
 
         initializer = UniformRandomSampler(rng,
            r_xyz=furn_xyz_rand, r_rot=furn_rot_rand, init_qpos=init_qpos)
@@ -76,7 +77,7 @@ class FloorTask(Task):
             self.merge_sensor(obj_mjcf)
             # Load object
             obj = obj_mjcf.get_collision(name=obj_name, site=True)
-            obj.append(new_joint(name=obj_name, type="free", damping="0.0001"))
+            obj.append(new_joint(name=obj_name, type="free", damping="0.0001", limited='false'))
             self.objects.append(obj)
             self.worldbody.append(obj)
             # unable all collision for soft objects
@@ -94,6 +95,11 @@ class FloorTask(Task):
         """Adds tendon constraints  to the MJCF model."""
         for one_tendon in tendon:
             self.tendon.append(one_tendon)
+            
+    def merge_default(self, default):
+        """Adds default definitions to the MJCF model."""
+        for one_default in default:
+            self.default.append(one_default)
 
     def place_objects(self, fixed_parts=None):
         """Places objects randomly until no collisions or max iterations hit."""

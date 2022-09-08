@@ -16,9 +16,9 @@
         <velocity ctrllimited="true" ctrlrange="-2.6100 2.6100" joint="joint6" kv="0.5" name="vel_right_j6"/>
         <velocity ctrllimited="true" ctrlrange="-2.6100 2.6100" joint="joint7" kv="0.1" name="vel_right_j7"/>
     </actuator>
-    <default>
+    <!-- <default>
        <joint damping=".1"/>
-    </default>
+    </default> -->
     <asset>
         <mesh name="link0" file="meshes/link0.stl" />
         <mesh name="link1" file="meshes/link1.stl" />
@@ -68,6 +68,7 @@
             <inertial pos="0 0 0.05" mass="4" diaginertia="0.4 0.4 0.4" />
             <geom type="mesh" contype="0" conaffinity="0" group="1" mesh="link0_vis" name="link0_visual" rgba="1 1 1 1"/>
             <geom type="mesh" group="0" mesh="link0" name="link0_collision"/>
+            <!-- <site name="link0" size=".05" rgba="0.9019 0.0980 0.2941 0.3" type="sphere"/> -->
             <body name="link1" pos="0 0 0.333">
                 <inertial pos="0 0 -0.07" mass="3" diaginertia="0.3 0.3 0.3" />
                 <joint name="joint1" pos="0 0 0" axis="0 0 1" limited="true" range="-2.8973 2.8973" />

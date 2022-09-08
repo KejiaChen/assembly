@@ -87,4 +87,5 @@ wandb/
 .idea
 furniture/binary/
 funiture/log/
+.history/
 

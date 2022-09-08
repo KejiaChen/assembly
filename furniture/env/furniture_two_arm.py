@@ -245,6 +245,19 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             return self._num_connects
         else:
             return len(self._object_names) - 1
+        
+    @property
+    def get_pos(sim, name):
+        """
+        Get the position of a site, body, or geom
+        """
+        if name in sim.model.body_names:
+            return sim.data.get_body_xpos(name).copy()
+        if name in sim.model.geom_names:
+            return sim.data.get_geom_xpos(name).copy()
+        if name in sim.model.site_names:
+            return sim.data.get_site_xpos(name).copy()
+        raise ValueError
 
     @property
     def observation_space(self):
@@ -1522,6 +1535,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
 
         return state
 
+    # TODO: we must add some limitations to the randomness
     def _place_objects(self):
         """
         Returns the randomly distributed initial positions and rotations of furniture parts.
@@ -1534,7 +1548,8 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             mjcf_obj = next(iter(self.mujoco_objects.values()))
             for part in self._config.fix_init_parts:
                 pos = self.init_pos[part]
-                quat = Quaternion(self.init_quat[part])
+                # quat = Quaternion(self.init_quat[part])
+                quat = self.init_quat[part]
                 rad = mjcf_obj.get_horizontal_radius(part)
                 self.fixed_parts.append((part, rad, Qpos(pos[0], pos[1], pos[2], quat)))
         return self.mujoco_model.place_objects(fixed_parts=self.fixed_parts)
@@ -1567,14 +1582,22 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         if self._config.furn_size_rand != 0:
             rand = self._init_random(1, "resize")[0]
             resize_factor = 1 + rand
+            # TODO: after model is already loaded into sim, 
+            # does it still make sense to change the model?
             self.mujoco_model.resize_objects(resize_factor)
 
         if self._load_init_states and np.random.rand() > 0.2:
             # load predefined initial positions
             self.set_init_qpos(np.random.choice(self._load_init_states))
 
+        ## DEBUG: check the initialization
+        # temporary_render = self._get_viewer()
+        ## DEBUG
         # reset simulation data and clear buffers
         self.sim.reset()
+        ## DEBUG
+        # self.render()
+        ## DEBUG
 
         # store robot's contype, conaffinity (search MuJoCo XML API for details)
         # disable robot collision
@@ -1657,9 +1680,11 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                     self.sim.model.geom_conaffinity[geom_id] = conaffinity
             self.sim.forward()
         else:
-            if self.init_pos is None:
+            # TODO: fix place object
+            if self.init_pos is None: # self.init_pos is obtained from <custom> value in the xml file
                 self.init_pos, self.init_quat = self._place_objects()
             elif not self._config.fix_init:
+                # update init_pos and init_quat with randomization
                 init_pos, init_quat = self._place_objects()
                 self.init_pos.update(init_pos)
                 self.init_quat.update(init_quat)
@@ -1678,6 +1703,9 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                     self.sim.forward()
                     self.sim.step()
                     self._slow_objects()
+                    ## DEBUG
+                    # self.render()
+                    ## DEBUG
 
         if self._recipe:
             # preassemble furniture pieces
@@ -1794,6 +1822,14 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         for _ in range(100):
             self.sim.forward()
             self.sim.step()
+            
+        # save reset model
+        file_path = os.path.join(os.path.dirname(__file__),
+            f"models/assets/generated_models/sim_reset_model.xml",
+        )
+        with open (file_path, 'w+') as file:
+            self.sim.save(file)
+        logger.debug("save simulation reset xml model to %s" % file_path)
 
         self._initial_right_hand_quat = [None for _ in range(self.num_robots)]
         self._initial_left_hand_quat = [None for _ in range(self.num_robots)]
@@ -1995,6 +2031,15 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             )
 
         logger.debug(self.mujoco_model.get_xml())
+        
+        # save the construct mujoco model
+        # world_xml=self.mujoco_model.get_xml()
+        file_path = os.path.join(os.path.dirname(__file__),
+            f"models/assets/generated_models/construct_model.xml")
+        self.mujoco_model.save_model(fname=file_path, pretty=True)
+        # with open (file_path, 'w+') as file:
+        #     file.write(world_xml)
+        logger.debug("save construct xml model to %s" % file_path)
 
         # construct mujoco model from xml
         self.mjpy_model = self.mujoco_model.get_model(mode="mujoco_py")
@@ -2092,6 +2137,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                 self.mujoco_robots[idx].add_gripper(self.mujoco_robots[idx].prefix+"right_hand", self.grippers[idx]["right"])
                 self.mujoco_robots[idx].set_base_xpos(robot_config["init_pos"])
                 self.mujoco_robots[idx].set_base_xquat(robot_config["init_quat"])
+                print("robot base pos", self.mujoco_robots[idx].get_base_xpos())
 
                 self.gripper_equality = self._objects.equality
 
@@ -2154,17 +2200,27 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         """
         floor_full_size = (2.0, 1.0)
         floor_friction = (2.0, 0.005, 0.0001)
-        floor_pos = [0.2, 0.0]
+        floor_pos = [0.2, -0.02]
+        
+        table_contact_z_pos = 0.23 # base postion of panda is 0.213
+        
         # TODO: table arena
         from .models.arenas import FloorArena
         from .models.arenas import TableArena
 
         self.mujoco_arena = FloorArena(
-            floor_pos=floor_pos, floor_full_size=floor_full_size, floor_friction=floor_friction
+            floor_pos=floor_pos, floor_full_size=floor_full_size, floor_friction=floor_friction, table_contact_z_pos=table_contact_z_pos
         )
         # self.mujoco_arena = TableArena(
         #     table_full_size=(1.5, 1.0, 0.677045), table_friction=floor_friction
         # )
+        
+        # save arena model
+        file_path = os.path.join(os.path.dirname(__file__),
+            f"models/assets/generated_models/sim_arena_model.xml",
+        )
+        self.mujoco_arena.save_model(file_path, pretty=True)
+        logger.debug("save reset arena xml model to %s" % file_path)
 
     def _load_model_object(self):
         """
@@ -2193,6 +2249,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         self.n_objects = len(self.mujoco_objects)
         self.mujoco_equality = self._objects.equality
         self.mujoco_tendon = self._objects.tendon
+        self.mujoco_default = self._objects.default
 
     def _load_model(self):
         """
@@ -2201,7 +2258,9 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         """
         # task includes arena, robot, and objects of interest
         from .models.tasks import FloorTask
-
+        
+        # Here self.init_pos and self.init_quat is set to <custom> values 
+        # in the xml file
         init_qpos = next(iter(self.mujoco_objects.values())).get_init_qpos(
             list(self.mujoco_objects.keys())
         )
@@ -2210,18 +2269,21 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             self.init_quat = {}
             for key, qpos in init_qpos.items():
                 self.init_pos[key] = [qpos.x, qpos.y, qpos.z]
-                self.init_quat[key] = qpos.quat
+                # TODO: loading quaternion for initialization leads to some problems
+                self.init_quat[key] = list(qpos.quat)
         self.mujoco_model = FloorTask(
             self.mujoco_arena,
             self.mujoco_robots,
             self.mujoco_objects,
             self.mujoco_equality,
             self.mujoco_tendon,
+            self.mujoco_default,
             self._config.furn_xyz_rand,
             self._config.furn_rot_rand,
             self._rng,
             init_qpos,
         )
+        
 
     def _load_recipe(self):
         furniture_name = furniture_names[self._furniture_id]
