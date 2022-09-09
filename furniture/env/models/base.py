@@ -107,8 +107,8 @@ class MujocoXML(object):
                 self.sensor_index += 1
         for one_contact in other.contact:
             self.contact.append(one_contact)
-        # for one_default in other.default:
-        #     self.default.append(one_default)
+        for one_default in other.default:
+            self.default.append(one_default)
         for one_tendon in other.tendon:
             self.tendon.append(one_tendon)
         # self.config.append(other.config)
@@ -195,19 +195,19 @@ class MujocoXML(object):
                 print('\t\t omitted', )
         return names
 
-    def get_object_names(self):
-        if self.debug:
-            print('Reading object xml')
-        names = []
-        for child in self.root.iter("body"):
-            if self.debug:
-                print('\t', child.tag, child.get('name'))
-            child_name = child.get('name')
-            if not child_name.startswith("composite"):
-                names.append(child.get('name'))
-            else:
-                print('\t\t omitted', )
-        return names
+    # def get_object_names(self):
+    #     if self.debug:
+    #         print('Reading object xml')
+    #     names = []
+    #     for child in self.root.iter("body"):
+    #         if self.debug:
+    #             print('\t', child.tag, child.get('name'))
+    #         child_name = child.get('name')
+    #         if not child_name.startswith("composite"):
+    #             names.append(child.get('name'))
+    #         else:
+    #             print('\t\t omitted', )
+    #     return names
 
     def sensor_table(self, tag):
         if tag == 'touch':

@@ -161,7 +161,30 @@ class FloorArena(Arena):
                                   boden_z_pos + self.leg_half_size[1]])
         self.leg4.set("pos", array_to_string(self.leg4_pos))
         self.leg4.set("size", array_to_string(self.leg_half_size))
+        
+        self._reset_cameras()
 
+    
+    def _reset_cameras(self):
+        self.front_camera = self.worldbody.find(".//camera[@name='frontview']")
+        self.frontcam_pos = np.array([self.table_pos[0], 
+                                      self.table_pos[1]+2*self.table_half_size[1], 
+                                      self.table_pos[2]+1.0])
+        self.front_camera.set("pos", array_to_string(self.frontcam_pos))
+        
+        self.side_camera = self.worldbody.find(".//camera[@name='sideview']")
+        self.sidecam_pos = np.array([self.table_pos[0]+self.table_half_size[0], 
+                                     self.table_pos[1], 
+                                     self.table_pos[2]+0.3])
+        self.side_camera.set("pos", array_to_string(self.sidecam_pos))
+        
+        self.top_camera = self.worldbody.find(".//camera[@name='topview']")
+        self.topcam_pos = np.array([self.table_pos[0], 
+                                    self.table_pos[1]+0.5*self.table_half_size[1], 
+                                    self.table_pos[2]+1.5])
+        self.top_camera.set("pos", array_to_string(self.topcam_pos))
+        
+    def _reset_profiles(self):
         self.prof1 = self.worldbody.find(".//geom[@name='shelf_profile1_visual']")
         if self.prof1 is not None:
             # self.leg1_pos = np.array([self.table_half_size[0], self.table_half_size[1], -0.677+self.leg_half_size[1]])
@@ -188,4 +211,3 @@ class FloorArena(Arena):
                                        self.table_pos[2] + self.hori_prof_full_size[2] - self.vert_prof_half_size[2]])
             self.prof3.set("pos", array_to_string(self.prof3_pos))
             self.prof3.set("size", array_to_string(self.vert_prof_half_size))
-            

@@ -113,6 +113,13 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             )
             for idx, robot_config in enumerate(robot_configs)
         ]
+        
+        self.robot_center = np.zeros(3)
+        for robot_config in self.robot_configs:
+            self.robot_center =+ np.array(robot_config["init_pos"])
+            
+        self.robot_center = self.robot_center/self.num_robots
+    
 
 
         # TODO : Baxter arms
@@ -1681,20 +1688,20 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             self.sim.forward()
         else:
             # TODO: fix place object
-            if self.init_pos is None: # self.init_pos is obtained from <custom> value in the xml file
-                self.init_pos, self.init_quat = self._place_objects()
-            elif not self._config.fix_init:
-                # update init_pos and init_quat with randomization
-                init_pos, init_quat = self._place_objects()
-                self.init_pos.update(init_pos)
-                self.init_quat.update(init_quat)
-            # set furniture positions
-            for i, body in enumerate(self._object_names):
-                logger.debug(f"{body} {self.init_pos[body]} {self.init_quat[body]}")
-                if self._config.assembled:
-                    self._object_group[i] = 0
-                else:
-                    self._set_qpos(body, self.init_pos[body], self.init_quat[body])
+            # if self.init_pos is None: # self.init_pos is obtained from <custom> value in the xml file
+            #     self.init_pos, self.init_quat = self._place_objects()
+            # elif not self._config.fix_init:
+            #     # update init_pos and init_quat with randomization
+            #     init_pos, init_quat = self._place_objects()
+            #     self.init_pos.update(init_pos)
+            #     self.init_quat.update(init_quat)
+            # # set furniture positions
+            # for i, body in enumerate(self._object_names):
+            #     logger.debug(f"{body} {self.init_pos[body]} {self.init_quat[body]}")
+            #     if self._config.assembled:
+            #         self._object_group[i] = 0
+            #     else:
+            #         self._set_qpos(body, self.init_pos[body], self.init_quat[body])
 
             # stablize furniture pieces
             for _ in range(10):
@@ -2200,7 +2207,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         """
         floor_full_size = (2.0, 1.0)
         floor_friction = (2.0, 0.005, 0.0001)
-        floor_pos = [0.2, -0.02]
+        floor_pos = [self.robot_center[0], -0.02]
         
         table_contact_z_pos = 0.23 # base postion of panda is 0.213
         
