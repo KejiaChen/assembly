@@ -18,7 +18,6 @@ import os
 # sys.path.append('/home/kejia/Documents/assembly')
 
 import furniture.env.transform_utils as T
-from furniture.env.furniture_panda import FurniturePandaEnv
 from furniture.env.furniture_two_panda_dense import FurnitureTwoPandaDenseRewardEnv
 from furniture.env.models import background_names, furniture_name2id, furniture_xmls
 from furniture.util.logger import logger
@@ -524,11 +523,11 @@ class FurnitureTwoPandaGenEnv(FurnitureTwoPandaDenseRewardEnv):
                     self._get_viewer()
                     self.render()
                     # # TODO: debugging
-                    # while True:
-                    #     zero_action = np.zeros((8,))
-                    #     ob, reward, _, info = self.step([zero_action, zero_action])
-                    #     self.render()
-                    # #     print("hole_pos", self._get_pos('hole-wire,0,90,180,270,conn_site1'))
+                    while True:
+                        zero_action = np.zeros((8,))
+                        ob, reward, _, info = self.step([zero_action, zero_action])
+                        self.render()
+                        # print("hole_pos", self._get_pos('hole-wire,0,90,180,270,conn_site1'))
                     # # TODO: debugging
                 if self._config.record_vid:
                     self.vid_rec.capture_frame(self.render("rgb_array")[0])
@@ -1422,16 +1421,18 @@ def main():
     parser = create_parser(env="IKEATwoPandaGen-v0", single_arm=False)
     parser.set_defaults(render=True)
     parser.set_defaults(start_count=0)
-    parser.set_defaults(furniture_name="wire_insertion_parallel")
+    parser.set_defaults(furniture_name="wire_insertion_parallel_v1")
     parser.set_defaults(n_demos=100)
     parser.set_defaults(camera_ids=[0])
     parser.set_defaults(debug=True)
     parser.set_defaults(init_base_position=[[0, 0.65, -0.7], [0.7, 0.65, -0.7]])
+    parser.set_defaults(fix_init_parts=["wire1"])
     # parser.set_defaults(follow=True)
     parser.set_defaults(unity=False)
     parser.set_defaults(background='Simple')
     parser.set_defaults(record_demo=False)
     parser.set_defaults(record_vid=False)
+    parser.set_defaults(obstacles=False)
 
     config, unparsed = parser.parse_known_args()
     if len(unparsed):

@@ -190,6 +190,25 @@ def new_geom(geom_type, size, pos=(0, 0, 0), rgba=RED, group=0, **kwargs):
     element = ET.Element("geom", attrib=kwargs)
     return element
 
+def new_geom_class(class_type, name, geom_type, size, pos=(0, 0, 0), **kwargs):
+    """
+    Creates a geom element with attributes specified by @**kwargs.
+
+    Args:
+        geom_type (str): type of the geom.
+            see all types here: http://mujoco.org/book/modeling.html#geom
+        size: geom size parameters.
+        pos: 3d position of the geom frame.
+    """
+    kwargs["class"] = str(class_type)
+    kwargs["name"] = str(name)
+    kwargs["type"] = str(geom_type)
+    kwargs["size"] = array_to_string(size)
+    # kwargs["rgba"] = array_to_string(rgba)
+    # kwargs["group"] = str(group)
+    kwargs["pos"] = array_to_string(pos)
+    element = ET.Element("geom", attrib=kwargs)
+    return element
 
 def new_body(name=None, pos=None, **kwargs):
     """
@@ -253,8 +272,9 @@ def add_prefix(
             v = root.get(attrib, None)
             # Only add prefix if the attribute exist, the current attribute doesn't already begin with prefix,
             # and the @exclude filter is either None or returns False
-            if v is not None and not v.startswith(prefix) and (exclude is None or not exclude(v)):
-                root.set(attrib, prefix + v)
+            if exclude is None or not exclude(attrib):
+                if v is not None and not v.startswith(prefix): # and (exclude is None or not exclude(v, switch=1)):
+                    root.set(attrib, prefix + v)
     # Continue recursively searching through the element tree
     for r in root:
         add_prefix(root=r, prefix=prefix, tags=tags, attribs=attribs, exclude=exclude)

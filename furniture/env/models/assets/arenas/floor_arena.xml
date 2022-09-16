@@ -1,5 +1,7 @@
 <mujoco model="table_arena">
     <asset>
+        <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512"
+        height="3072"/>
         <texture builtin="flat" height="256" rgb1="1 1 1." rgb2=".2 .3 .4" type="skybox" width="256"/>
         <texture builtin="checker" height="512" name="texplane" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" type="2d" width="512"/>
         <material name="floorplane" reflectance="0.5" texrepeat="1 1" texture="texplane" texuniform="true"/>
@@ -11,6 +13,18 @@
         <material name="table_legs_metal" reflectance="0.8" shininess="0.8" texrepeat="1 1" texture="tex-steel-brushed" />
     </asset>
 
+     <default>
+        <default class="obstacle">
+            <default class="obs_collision">
+                <geom quat="0.707107 0.707107 0 0" condim="1" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+            </default>
+            <default class="obs_visual">
+                <geom quat="0.707107 0.707107 0 0" conaffinity="0" contype="0" group="1" material="table_legs_metal"/>
+            </default>
+            <!-- <site size=".005" rgba="0.2941 0.9019 0.0980 0.3" type="sphere"/> -->
+        </default>
+    </default>
+
     <worldbody>
         <!-- ground floor -->
         <geom condim="3" material="floorplane" name="boden" pos="0 0 -0.677" size="5 5 .125" type="plane" />
@@ -18,8 +32,8 @@
 <!--        <geom pos="0 0 0" size="0.4 0.4 0.4" type="box" group="0" name="table_collision" friction="1 0.005 0.0001"/>-->
 <!--        <geom pos="0 0 0" size="0.4 0.4 0.4" type="box" conaffinity="0" contype="0" group="1" name="table_visual" material="table_ceramic"/>-->
         <!-- original plane -->
-        <geom condim="3" rgba=".7 .5 .3 1" name="FLOOR" pos="0 0 0" size="0.5 0.5 .125" type="plane" />
-        <site pos="0 0 0.2" name="floor_top" size="0.001 0.001 0.001" rgba="0 0 0 0"/>
+        <geom condim="3" rgba="0 0 0 0" name="FLOOR" pos="0 0 0" size="0.5 0.5 .125" type="plane" group="0" />
+        <site pos="0 0 0.2" name="floor_top" size="0.001 0.001 0.001" rgba="0 0 0 0" group="0" />
 
         <!--Table (visual only)-->
         <body name="table" pos="0 0 0">

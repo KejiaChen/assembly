@@ -6,7 +6,7 @@ import pickle
 import time
 from collections import OrderedDict
 from sys import platform
-
+import copy
 import numpy as np
 import gym.spaces
 from pyquaternion import Quaternion
@@ -78,6 +78,9 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
 
         self._screen_width = config.screen_width
         self._screen_height = config.screen_height
+        
+        # arena
+        self.arena_obstacle = config.obstacles
 
         # robots = list(robots) if type(robots) is list or type(robots) is tuple else [robots]
         self.robot_names = config.agent_type
@@ -99,6 +102,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                 **{
                     "agent_type": config.agent_type[idx],
                     "control_type": self._control_type,
+                    "gripper_type": config.gripper_type[idx],
                     # "mount_type": mount_types[idx],
                     # "initialization_noise": initialization_noise[idx],
                     "control_freq": self._control_freq,
@@ -1555,8 +1559,10 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             mjcf_obj = next(iter(self.mujoco_objects.values()))
             for part in self._config.fix_init_parts:
                 pos = self.init_pos[part]
-                # quat = Quaternion(self.init_quat[part])
-                quat = self.init_quat[part]
+                quat = Quaternion(self.init_quat[part])
+                print("fixed init pos", pos)
+                print("fixed init quat", quat)
+                # quat = self.init_quat[part]
                 rad = mjcf_obj.get_horizontal_radius(part)
                 self.fixed_parts.append((part, rad, Qpos(pos[0], pos[1], pos[2], quat)))
         return self.mujoco_model.place_objects(fixed_parts=self.fixed_parts)
@@ -1687,21 +1693,24 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
                     self.sim.model.geom_conaffinity[geom_id] = conaffinity
             self.sim.forward()
         else:
-            # TODO: fix place object
-            # if self.init_pos is None: # self.init_pos is obtained from <custom> value in the xml file
-            #     self.init_pos, self.init_quat = self._place_objects()
-            # elif not self._config.fix_init:
-            #     # update init_pos and init_quat with randomization
-            #     init_pos, init_quat = self._place_objects()
-            #     self.init_pos.update(init_pos)
-            #     self.init_quat.update(init_quat)
-            # # set furniture positions
-            # for i, body in enumerate(self._object_names):
-            #     logger.debug(f"{body} {self.init_pos[body]} {self.init_quat[body]}")
-            #     if self._config.assembled:
-            #         self._object_group[i] = 0
-            #     else:
-            #         self._set_qpos(body, self.init_pos[body], self.init_quat[body])
+            # TODO: fix place deformable object
+            self._place_object_names = copy.copy(self._object_names)
+            for fix_object in self._config.fix_init_parts:
+                self._place_object_names.remove(fix_object)
+            if self.init_pos is None: # self.init_pos is obtained from <custom> value in the xml file
+                self.init_pos, self.init_quat = self._place_objects()
+            elif not self._config.fix_init:
+                # update init_pos and init_quat with randomization
+                init_pos, init_quat = self._place_objects()
+                self.init_pos.update(init_pos)
+                self.init_quat.update(init_quat)
+            # set furniture positions
+            for i, body in enumerate(self._place_object_names):
+                logger.debug(f"{body} {self.init_pos[body]} {self.init_quat[body]}")
+                if self._config.assembled:
+                    self._object_group[i] = 0
+                else:
+                    self._set_qpos(body, self.init_pos[body], self.init_quat[body])
 
             # stablize furniture pieces
             for _ in range(10):
@@ -2139,7 +2148,7 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
 
                 self.mujoco_robots[idx] = Panda(use_torque=use_torque, idn=idx)
                 # TODO: temporarily use two finger for convenience
-                self.grippers[idx] = {"right": gripper_factory("TwoFingerGripper", idn=idx)}
+                self.grippers[idx] = {"right": gripper_factory(robot_config["gripper_type"], idn=idx)}
                 self.grippers[idx]["right"].hide_visualization()
                 self.mujoco_robots[idx].add_gripper(self.mujoco_robots[idx].prefix+"right_hand", self.grippers[idx]["right"])
                 self.mujoco_robots[idx].set_base_xpos(robot_config["init_pos"])
@@ -2205,19 +2214,21 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         """
         Loads the arena XML
         """
-        floor_full_size = (2.0, 1.0)
+        floor_full_size = (1.6, 0.8)
         floor_friction = (2.0, 0.005, 0.0001)
-        floor_pos = [self.robot_center[0], -0.02]
+        floor_pos = [self.robot_center[0], -0.15]
         
-        table_contact_z_pos = 0.23 # base postion of panda is 0.213
+        table_contact_z_pos = 0.2335 # base postion of panda is 0.213
         
         # TODO: table arena
         from .models.arenas import FloorArena
         from .models.arenas import TableArena
-
         self.mujoco_arena = FloorArena(
-            floor_pos=floor_pos, floor_full_size=floor_full_size, floor_friction=floor_friction, table_contact_z_pos=table_contact_z_pos
-        )
+                floor_pos=floor_pos, floor_full_size=floor_full_size, floor_friction=floor_friction, table_contact_z_pos=table_contact_z_pos
+            )
+        if self.arena_obstacle:
+            self.mujoco_arena.add_multiple_obstacles()
+        
         # self.mujoco_arena = TableArena(
         #     table_full_size=(1.5, 1.0, 0.677045), table_friction=floor_friction
         # )
@@ -3184,18 +3195,20 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
             for idx in range(len(action_list)):
                 self.idx = idx
                 self._controller_idx = idx
-                # action = action_list[idx]
                 if self.robot_configs[idx]["agent_type"] in ["Sawyer", "Panda", "Jaco", "Fetch"]:
                     action_list[idx][:3] = action_list[idx][:3] * self._move_speed
+                    # why? rotation?
                     action_list[idx][:3] = [-action_list[idx][1], action_list[idx][0], action_list[idx][2]]
                     gripper_pos = self.sim.data.get_body_xpos(self.mujoco_robots[idx].prefix + "right_hand")
                     d_pos = self._bounded_d_pos(action_list[idx][:3], gripper_pos)
+                    
                     self._initial_right_hand_quat[idx] = T.euler_to_quat(
                         action_list[idx][3:6] * self._rotate_speed, self._initial_right_hand_quat[idx]
                     )
                     d_quat = T.quat_multiply(
                         T.quat_inverse(self._right_hand_quat), self._initial_right_hand_quat[idx]
                     )
+                    
                     gripper_dis = action_list[idx][-2]
                     action_list[idx] = np.concatenate([d_pos, d_quat, [gripper_dis]])
 
@@ -3555,6 +3568,8 @@ class FurnitureTwoEnv(metaclass=EnvMeta):
         assert object_qpos.shape == (7,)
         object_qpos[:3] = pos
         object_qpos[3:] = rot
+        # Caution: this can be problematic for deformable objects, as it sets only the first JOINT!
+        # It works for rigid bodies which has only a free joint.
         self.sim.data.set_joint_qpos(name, object_qpos)
 
     def _set_qpos0(self, name, qpos):

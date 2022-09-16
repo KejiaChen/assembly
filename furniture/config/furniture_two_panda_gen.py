@@ -26,3 +26,11 @@ def add_argument(parser):
         default=20,
         help="number of demos to generate",
     )
+    
+    parser.add_argument(
+        "--gripper_type",
+        type=list,
+        default=["TwoFingerGripper", "TwoFingerGripper"],
+        help="specific gripper to use",
+    )
+

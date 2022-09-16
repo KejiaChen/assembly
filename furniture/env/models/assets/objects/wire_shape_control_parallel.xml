@@ -1,0 +1,164 @@
+<mujoco model="wire_insertion">
+    <custom>
+<!--        <numeric data="0.0   0.21 0.01497 0.5 -0.5 -0.5 0.5" name="0_part0_initpos" />-->
+<!--        <numeric data="-0.37 0.31 0.01497 0.499854 0.499854 -0.500146 -0.500146" name="1_part1_initpos" />-->
+<!--        <numeric data="-0.37 0.21 0.01497 0.500129 0.500129 0.499871 0.499871" name="2_part2_initpos" />-->
+<!--        <numeric data="0.0   0.31 0.01497 0.5 -0.5 0.5 -0.5" name="3_part3_initpos" />-->
+        <numeric data="0.4 0.25 0.21 1 0 0 0" name="wire1_initpos" />
+<!--        <numeric data="0.3 0.45 0.051527 1 0 0 0" name="wire1_initpos" />-->
+<!--        <numeric data="0.6 0.27 0.051527 0 0 0 1" name="wire2_initpos" />-->
+<!--        <numeric data="0.0 0.2 0.07 0.7073883 0 0.7068252 0" name="insertion_hole_1_initpos" />-->
+        <!-- horizontal-->
+        <numeric data="-0.2 -0.7 0.195 1 0 0 0" name="target1_initpos" />
+        <!-- vertical-->
+<!--        <numeric data="-0.1 0.0 0.052527 0.7073883 -0.7068252 0 0" name="table1_initpos" />&ndash;&gt;-->
+    </custom>
+
+    <asset>
+        <material name="table_mat" specular="0" shininess="0.5" reflectance="0" rgba="0.93 0.93 0.93 1"/>
+        <!-- ceramic table texture and material-->
+        <texture file="../textures/ceramic.png" type="cube" name="tex-ceramic"/>
+        <material name="table_ceramic" reflectance="0.0" shininess="0.0" specular="0.2" texrepeat="1 1" texture="tex-ceramic" />
+        <texture file="../textures/steel-scratched.png" type="cube" name="steel-metal"/>
+        <material name="smetal" reflectance="1.0" shininess="1.0" specular="1.0" texrepeat="1 1" texture="steel-metal" texuniform="true"/>
+        <texture file="../textures/brass-ambra.png" type="cube" name="brass-metal"/>
+        <material name="bmetal"  reflectance="1.0" shininess="1.0" specular="1.0" texrepeat="1 1" texture="brass-metal" texuniform="true"/>
+        <mesh file="table_lack_0825/table.stl" name="part4" scale="0.015 0.015 0.02" />
+        <texture file="../textures/light-wood.png" name="tex-light-wood" type="2d" />
+        <material name="pencil-wood" reflectance="0.5" texrepeat="20 20" texture="tex-light-wood" texuniform="true" />
+        <texture file="../textures/red-wood.png" name="tex-red-wood" type="2d" />
+        <material name="red-wood" reflectance="0.5" texrepeat="20 20" texture="tex-red-wood" texuniform="true" />
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" rgb2=".2 .3 .4" width="300" height="300" mark="edge" markrgb=".2 .3 .4"/>
+        <material name="self" rgba="0.1 0.1 0.1 1"/>
+        <material name="self_default" rgba=".7 .5 .3 1"/>
+        <material name="self_highlight" rgba="0 .5 .3 1"/>
+        <material name="effector" rgba=".7 .4 .2 1"/>
+        <material name="effector_default" rgba=".7 .4 .2 1"/>
+        <material name="effector_highlight" rgba="0 .5 .3 1"/>
+        <material name="decoration" rgba=".3 .5 .7 1"/>
+        <material name="eye" rgba="0 .2 1 1"/>
+        <material name="target" rgba=".6 .3 .3 1"/>
+        <material name="target_default" rgba=".6 .3 .3 1"/>
+        <material name="target_highlight" rgba=".6 .3 .3 .4"/>
+        <material name="site" rgba=".5 .5 .5 .3"/>
+        <!-- <material class="panda" name="white" rgba="1 1 1 1"/>
+        <material class="panda" name="off_white" rgba="0.901961 0.921569 0.929412 1"/>
+        <material class="panda" name="black" rgba="0.25 0.25 0.25 1"/>
+        <material class="panda" name="green" rgba="0 1 0 1"/>
+        <material class="panda" name="light_blue" rgba="0.039216 0.541176 0.780392 1"/> -->
+    </asset>
+
+    <default>
+        <default class="swimmer">
+            <joint type="hinge" pos="0 -0.015 0" axis="0 0 1" damping=".005" limited="true" solreflimit=".05 1" solimplimit="0 .8 .1" armature="1e-6"/>
+            <default class="collision">
+                <geom type="box" size="0.001 0.015 0.0075" quat="0.707107 0.707107 0 0" rgba="0 0 0 0"/>
+            </default>
+            <default class="visual">
+                <geom type="capsule" size="0.0075" quat="0.707107 0.707107 0 0" fromto="0 -0.015 0 0 0.015 0" material="self"/>
+            </default>
+            <site size=".005" rgba="0.2941 0.9019 0.0980 0.3" type="sphere"/>
+        </default>
+        <default class="panda">
+            <material specular="0.5" shininess="0.25"/>
+            <default class="robot_visual">
+                <geom type="mesh" contype="0" conaffinity="0" group="1"/>
+            </default>
+            <default class="robot_collision">
+                <geom type="mesh" group="0"/>
+                <default class="fingertip_pad_collision_1">
+                <geom type="box" size="0.0085 0.004 0.0085" pos="0 0.0055 0.0445"/>
+                </default>
+                <default class="fingertip_pad_collision_2">
+                <geom type="box" size="0.003 0.002 0.003" pos="0.0055 0.002 0.05"/>
+                </default>
+                <default class="fingertip_pad_collision_3">
+                <geom type="box" size="0.003 0.002 0.003" pos="-0.0055 0.002 0.05"/>
+                </default>
+                <default class="fingertip_pad_collision_4">
+                <geom type="box" size="0.003 0.002 0.0035" pos="0.0055 0.002 0.0395"/>
+                </default>
+                <default class="fingertip_pad_collision_5">
+                <geom type="box" size="0.003 0.002 0.0035" pos="-0.0055 0.002 0.0395"/>
+                </default>
+            </default>
+        </default>
+
+    </default>
+
+     <equality>
+<!--        <weld active="false" body1="wire1" body2="insertion_hole_1" solimp="1 1 0.5" solref="0.01 0.3" />-->
+<!--        <weld active="false" body1="wire1" body2="table1" solimp="1 1 0.5" solref="0.01 0.3" />-->
+        <connect active="false" body1="wire1" body2="target1" anchor="0.10514361 0.19101518 0.10821976" solimp="1 1 0.5" solref="0.01 0.3" />
+        <!-- <weld active="true" body1="table1" solimp="1 1 0.5" solref="0.01 0.3" /> -->
+    </equality>
+
+    <compiler meshdir=""/>
+    <size njmax="8000" nconmax="4000"/>
+
+    <worldbody>
+        <!-- include a wire -->
+        <!-- <body name="wire1" pos="0.16 0.285 0.122" quat="1 0 0 0">
+           <freejoint/>
+           <include file="./rope_expanded_short.xml"/>
+           <body xmlns:xi="http://www.w3.org/2001/XInclude">
+           <xi:include href="source.xml" parse="xml" /> -->
+           <!-- </body> --> -->
+
+        <!-- Wire -->
+        <!-- <body name="wire1" pos="0 0 .5" childclass="swimmer">
+        <inertial pos="0.055 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08"/>
+        <light name="light_1" diffuse=".8 .8 .8" pos="0 0 1.5"/>
+        <camera name="tracking1" pos="0.0 -0.2 0.5" xyaxes="1 0 0 0 1 1" mode="trackcom" fovy="60"/>
+        <camera name="tracking2" pos="-0.9 0.5 0.15" xyaxes="0 -1 0 .3 0 1" mode="trackcom" fovy="60"/>
+        <camera name="eyes" pos="0 -.058 .005" xyaxes="-1 0 0 0 0 1"/>
+        <geom name="wire1_I1_geom" conaffinity="0" contype="0" pos="0 -.06 0" quat="0.707107 0.707107 0 0" size="0.005 0.01" rgba="0.1 0.7 0.7 1" group="1" type="capsule"/>
+        <geom name="noviz_collision_wire1_I1" condim="1" pos="0 -.06 0" quat="0.707107 0.707107 0 0" size="0.005 0.01" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+        <geom name="wire1_G0_geom" class="collision"/>
+        <geom name="noviz_collision_wire1_G0" class="visual"/>
+        <site name="head"/>
+        <body name="composite_B0" pos="0 .1 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B0_G1_geom"/><geom class="collision" name="noviz_collision_B0_G1"/><site name="site_0"/><joint name="J0_0" range="-120.0 120.0"/><joint name="J1_0" axis="1 0 0" range="-120.0 120.0"/><body name="composite_B1" pos="0 .1 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B1_G1_geom"/><geom class="collision" name="noviz_collision_B1_G1"/><site name="site_1"/><joint name="J0_1" range="-120.0 120.0"/><joint name="J1_1" axis="1 0 0" range="-120.0 120.0"/><body name="composite_B2" pos="0 .1 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B2_G1_geom"/><geom class="collision" name="noviz_collision_B2_G1"/><site name="site_2"/><joint name="J0_2" range="-120.0 120.0"/><joint name="J1_2" axis="1 0 0" range="-120.0 120.0"/><body name="composite_B3" pos="0 .1 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B3_G1_geom"/><geom class="collision" name="noviz_collision_B3_G1"/><site name="site_3"/><joint name="J0_3" range="-120.0 120.0"/><joint name="J1_3" axis="1 0 0" range="-120.0 120.0"/><body name="composite_B4" pos="0 .1 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B4_G1_geom"/><geom class="collision" name="noviz_collision_B4_G1"/><site name="site_4"/><joint name="J0_4" range="-120.0 120.0"/><joint name="J1_4" axis="1 0 0" range="-120.0 120.0"/><body name="composite_wire2" pos="0 .1 0"><inertial pos="0.055 0 0" quat="0.707107 0.707107 0 0" mass="0.00274889" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="wire2_G0_geom"/><geom class="collision" name="noviz_collision_wire2_G0"/><geom name="wire2_I2_geom" conaffinity="0" contype="0" pos="0 0.06 0" quat="0.707107 0.707107 0 0" size="0.005 0.01" rgba="0.1 0.7 0.7 1" group="1" type="capsule"/><geom name="noviz_collision_wire2_I2" condim="1" pos="0 0.06 0" quat="0.707107 0.707107 0 0" size="0.005 0.01" rgba="0 0 0 0" group="0" type="capsule" solref="0.001 1"/><site name="wire2_ltgt_site0" pos=" 0.0 0 0.01" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere"/><site name="wire2_rtgt_site0" pos=" 0.0 0 -0.01" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere"/><joint name="J0_wire2" range="-120.0 120.0"/><joint name="J1_wire2" axis="1 0 0" range="-120.0 120.0"/></body></body></body></body></body></body></body> -->
+
+        <body name="wire1" pos="0.5 0 .5" quat="0.707107 0 0 0.707107" childclass="swimmer">
+            <inertial pos="0.055 0 0" quat="0.707107 0 0.707107 0" mass="0.00274889" diaginertia="2.97797e-07 2.97797e-07 3.43612e-08"/>
+            <light name="light_1" diffuse=".8 .8 .8" pos="0 0 1.5"/>
+            <!-- <camera name="tracking1" pos="0.0 -0.5 1.25" xyaxes="1 0 0 0 1 1" mode="trackcom" fovy="60"/>
+            <camera name="tracking2" pos="-2.25 1.25 0.375" xyaxes="0 -1 0 .3 0 1" mode="trackcom" fovy="60"/>
+            <camera name="eyes" pos="0 -.058 .005" xyaxes="-1 0 0 0 0 1"/> -->
+            <!-- <joint type="free" limited="false"/> -->
+            <geom name="wire1_I1_geom" conaffinity="0" contype="0" pos="0 -0.025 0" quat="0.707107 0.707107 0 0" size="0.005 0.01" rgba="0.1 0.7 0.7 1" group="1" type="capsule"/>--&gt;
+            <geom name="noviz_collision_wire1_I1" condim="1" pos="0 -0.025 0" quat="0.707107 0.707107 0 0" size="0.005 0.01" type="capsule" rgba="0 0 0 0" group="0" solref="0.001 1"/>
+            <geom name="wire1_G0_geom" class="visual" group="1"/>
+            <geom name="noviz_collision_wire1_G0" class="collision" group="0"/>
+            <site group="1" name="wire1_ltgt_site0" pos="0.0075 0 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere"/>
+            <site group="1" name="wire1_rtgt_site0" pos="-0.0075 0 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere"/>
+            <!--site for hole-->
+            <site group="0" name="wire-hole,conn_site1" pos="0 -0.04 0" quat="0.707107 0 0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005"/>
+            <!--site for connection-->
+            <!-- <site group="1" name="wire1_end" pos="0.125 0 0" quat="0.707107 0 -0.707107 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere" /> -->
+            <site name="wire1_horizontal_radius_site" pos="0.0 0 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.0075"/>
+            <site name="head"/>
+            <body name="composite_B0" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B0_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B0_G1" group="0"/><site name="site_0"/><joint name="J0_0" range="-120.0 120.0" group="3"/><joint name="J1_0" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B1" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B1_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B1_G1" group="0"/><site name="site_1"/><joint name="J0_1" range="-120.0 120.0" group="3"/><joint name="J1_1" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B2" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B2_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B2_G1" group="0"/><site name="site_2"/><joint name="J0_2" range="-120.0 120.0" group="3"/><joint name="J1_2" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B3" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B3_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B3_G1" group="0"/><site name="site_3"/><joint name="J0_3" range="-120.0 120.0" group="3"/><joint name="J1_3" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B4" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B4_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B4_G1" group="0"/><site name="site_4"/><joint name="J0_4" range="-120.0 120.0" group="3"/><joint name="J1_4" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B5" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B5_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B5_G1" group="0"/><site name="site_5"/><joint name="J0_5" range="-120.0 120.0" group="3"/><joint name="J1_5" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B6" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B6_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B6_G1" group="0"/><site name="site_6"/><joint name="J0_6" range="-120.0 120.0" group="3"/><joint name="J1_6" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B7" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B7_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B7_G1" group="0"/><site name="site_7"/><joint name="J0_7" range="-120.0 120.0" group="3"/><joint name="J1_7" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B8" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B8_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B8_G1" group="0"/><site name="site_8"/><joint name="J0_8" range="-120.0 120.0" group="3"/><joint name="J1_8" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B9" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B9_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B9_G1" group="0"/><site name="site_9"/><joint name="J0_9" range="-120.0 120.0" group="3"/><joint name="J1_9" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B10" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B10_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B10_G1" group="0"/><site name="site_10"/><joint name="J0_10" range="-120.0 120.0" group="3"/><joint name="J1_10" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B11" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B11_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B11_G1" group="0"/><site name="site_11"/><joint name="J0_11" range="-120.0 120.0" group="3"/><joint name="J1_11" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B12" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B12_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B12_G1" group="0"/><site name="site_12"/><joint name="J0_12" range="-120.0 120.0" group="3"/><joint name="J1_12" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_B13" pos="0 0.035625 0"><inertial pos="0 0 0" quat="0.707107 0.707107 0 0" mass="0.0125664" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="B13_G1_geom" group="1"/><geom class="collision" name="noviz_collision_B13_G1" group="0"/><site name="site_13"/><joint name="J0_13" range="-120.0 120.0" group="3"/><joint name="J1_13" axis="1 0 0" range="-120.0 120.0" group="3"/><body name="composite_wire2" pos="0 0.03 0"><inertial pos="0.0 0 0" quat="0.707107 0.707107 0 0" mass="0.00274889" diaginertia="1.98968e-06 1.98968e-06 6.28319e-07"/><geom class="visual" name="wire2_G0_geom" group="1"/><geom class="collision" name="noviz_collision_wire2_G0" group="0"/><geom name="wire2_I2_geom" conaffinity="0" contype="0" pos="0 0.025 0" quat="0.707107 0.707107 0 0" size="0.005 0.01" rgba="0.1 0.7 0.7 1" group="1" type="capsule"/><geom name="noviz_collision_wire2_I2" condim="1" pos="0 0.025 0" quat="0.707107 0.707107 0 0" size="0.005 0.01" rgba="0 0 0 0" group="0" type="capsule" solref="0.001 1"/><site name="wire2_ltgt_site0" pos="0.0075 0.0 0 " rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere"/><site name="wire2_rtgt_site0" pos="-0.0075 0.0 0 " rgba="0.9019 0.0980 0.2941 0.3" size="0.005 0.005 0.005" type="sphere"/><site name="wire2_horizontal_radius_site" pos="0.0 0 0" rgba="0.9019 0.0980 0.2941 0.3" size="0.0075"/><joint name="J0_wire2" range="-120.0 120.0" group="3"/><joint name="J1_wire2" axis="1 0 0" range="-120.0 120.0" group="3"/></body></body></body></body></body></body></body></body></body></body></body></body></body></body></body></body>
+
+        <!-- target -->
+        <body name="target1" pos="0 0 .5" quat="1 0 0 0">
+            <geom name="target1_geom" conaffinity="0" contype="0" pos="1 1 .05" size="0.025" group="1" material="target" type="sphere"/>
+            <site name="hole-wire,conn_site1" rgba="0.9019 0.0980 0.2941 0.3" size="0.005"/>
+        </body>
+
+    </worldbody>
+<!--    <sensor>-->
+<!--        <touch name="clip1_touch" site="clip-wire,touch_site1"/>-->
+<!--    </sensor>-->
+<!--    <tendon>-->
+<!--&lt;!&ndash;        <spatial limited="true" range="0 0.2" width="0.01" rgba="0.1 0.1 0.1 1">&ndash;&gt;-->
+<!--        <spatial limited="true" range="0 0.4" width="0.01" rgba="0.7 0.7 0.7 1" damping="0.5">-->
+<!--            <site site="wire1_end"/>-->
+<!--            <site site="wire2_end"/>-->
+<!--        </spatial>-->
+<!--    </tendon>-->
+
+<!--    <include file='assets/actuator0.xml'/>-->
+<!--    <include file='assets/actuator1.xml'/>-->
+
+</mujoco>

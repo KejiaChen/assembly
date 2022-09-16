@@ -1,9 +1,15 @@
+import enum
 import numpy as np
 
 from ..base import MujocoXML
 from ...mjcf_utils import xml_path_completion
 from ...mjcf_utils import array_to_string, string_to_array
-from ...mjcf_utils import new_geom, new_body, new_joint
+from ...mjcf_utils import new_geom, new_body, new_joint, new_geom_class
+
+OBSTACLE = [{"size":[0.05, 0.025, 0.05], "pos":[0.2, 0.2]},
+            {"size":[0.05, 0.025, 0.05], "pos":[0, 0]},
+            {"size":[0.2, 0.025, 0.05], "pos":[0, -0.2]},
+            {"size":[0.05, 0.025, 0.2], "pos":[-0.3, 0.1]}]
 
 
 class Arena(MujocoXML):
@@ -85,14 +91,14 @@ class FloorArena(Arena):
     """Workspace that contains an empty floor."""
 
     def __init__(
-        self, floor_pos=[0, 0], floor_full_size=(1., 1.), floor_friction=(1, 0.005, 0.0001), table_contact_z_pos=-0.025
+        self, xml_path="arenas/floor_arena.xml",floor_pos=[0, 0], floor_full_size=(1., 1.), floor_friction=(1, 0.005, 0.0001), table_contact_z_pos=-0.025
     ):
         """
         Args:
             floor_full_size: full dimensions of the floor
             friction: friction parameters of the floor
         """
-        super().__init__(xml_path_completion("arenas/floor_arena.xml"))
+        super().__init__(xml_path_completion(xml_path))
         floor_thickness = 0.125
         table_thickness = 0.05
         boden_z_pos = -0.677
@@ -163,8 +169,37 @@ class FloorArena(Arena):
         self.leg4.set("size", array_to_string(self.leg_half_size))
         
         self._reset_cameras()
-
     
+    def _add_box_obstacle(self, body_name, box_size=[0.05, 0.05, 0.05], box_pos=[0.1, 0.2]):
+        # body_name = "obstacle1"
+        body_pos = self.table_pos + np.array([0, 0, self.table_half_size[2]])
+        body = new_body(name=body_name, pos=body_pos)
+        
+        box_pos.append(box_size[1])
+        body.append(
+            new_geom_class(
+                "obs_visual",
+                body_name + "_geom",
+                "box",
+                size=box_size,
+                pos=box_pos,
+            )
+        )
+        body.append(
+            new_geom_class(
+                "obs_collision",
+                "noviz_collision_" + body_name,
+                "box",
+                size=box_size,
+                pos=box_pos,
+            )
+        )
+        self.worldbody.append(body)
+    
+    def add_multiple_obstacles(self, obstacle_list=OBSTACLE):
+        for i, obstacle in enumerate(obstacle_list):
+            self._add_box_obstacle(body_name="obstacle"+str(i), box_size=obstacle["size"], box_pos=obstacle["pos"])
+        
     def _reset_cameras(self):
         self.front_camera = self.worldbody.find(".//camera[@name='frontview']")
         self.frontcam_pos = np.array([self.table_pos[0], 
@@ -211,3 +246,4 @@ class FloorArena(Arena):
                                        self.table_pos[2] + self.hori_prof_full_size[2] - self.vert_prof_half_size[2]])
             self.prof3.set("pos", array_to_string(self.prof3_pos))
             self.prof3.set("size", array_to_string(self.vert_prof_half_size))
+            

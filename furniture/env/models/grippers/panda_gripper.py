@@ -12,8 +12,8 @@ class PandaGripperBase(Gripper):
     Gripper for Franka's Panda (has two fingers).
     """
 
-    def __init__(self):
-        super().__init__(xml_path_completion("grippers/panda_gripper.xml"))
+    def __init__(self, idn=0):
+        super().__init__(xml_path_completion("grippers/panda_gripper.xml"), idn)
 
     def format_action(self, action):
         return action
@@ -24,7 +24,13 @@ class PandaGripperBase(Gripper):
 
     @property
     def joints(self):
-        return ["finger_joint1", "finger_joint2"]
+        return [self.prefix + "finger_joint1", 
+                self.prefix + "finger_joint2"]
+        
+    @property
+    def sensors(self):
+        return [self.prefix + "force_ee",
+                self.prefix + "torque_ee"]
 
     @property
     def dof(self):
@@ -32,28 +38,29 @@ class PandaGripperBase(Gripper):
 
     @property
     def visualization_sites(self):
-        return ["grip_site", "grip_site_cylinder"]
+        return [self.prefix + "grip_site", 
+                self.prefix + "grip_site_cylinder"]
 
     @property
     def contact_geoms(self):
         return [
-            "hand_collision",
-            "finger1_collision",
-            "finger2_collision",
-            "finger1_tip_collision",
-            "finger2_tip_collision",
+            self.prefix + "hand_collision",
+            self.prefix + "finger1_collision",
+            self.prefix + "finger2_collision",
+            self.prefix + "finger1_tip_collision",
+            self.prefix + "finger2_tip_collision",
         ]
 
     @property
     def left_finger_geoms(self):
         return [
-            "finger1_tip_collision",
+            self.prefix + "finger1_tip_collision",
         ]
 
     @property
     def right_finger_geoms(self):
-        return [
-            "finger2_tip_collision",
+        return [ 
+            self.prefix + "finger2_tip_collision",
         ]
 
 

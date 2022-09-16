@@ -81,7 +81,7 @@ class PandaIKController(Controller):
             self.robot_jpos_getter(), self.commanded_joint_positions
         )
         for i, delta in enumerate(deltas):
-            velocities[i] = -2. * delta  # -2. * delta
+            velocities[i] = -2. * delta  # -2. * delta, P controller
         velocities = self.clip_joint_velocities(velocities)
 
         self.commanded_joint_velocities = velocities

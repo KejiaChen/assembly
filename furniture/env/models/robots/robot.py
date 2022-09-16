@@ -1,7 +1,18 @@
 from collections import OrderedDict
+from doctest import FAIL_FAST
 
 from ..base import MujocoXML, XMLError
 from ....env.mjcf_utils import add_prefix, sort_elements, _element_filter
+
+def exclude_prefix(element):
+    exclude_root = ["default", "asset"]
+    exclude_attrib = ["class"] # "material"
+    
+    exclude = False
+    if element in exclude_root or element in exclude_attrib:
+        # print ("omit", element)
+        exclude =  True
+    return exclude
 
 
 class Robot(MujocoXML):
@@ -47,7 +58,7 @@ class Robot(MujocoXML):
         self._elements["root_body"] = self._elements["root_body"][0]
 
         # from robosuite: rename each instance to avoid conflicts
-        add_prefix(root=self.root, prefix=self.prefix, exclude=None)
+        add_prefix(root=self.root, prefix=self.prefix, exclude=exclude_prefix)
 
     def add_gripper(self, arm_name, gripper):
         """

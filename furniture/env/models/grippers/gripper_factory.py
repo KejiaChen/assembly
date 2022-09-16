@@ -39,7 +39,7 @@ def gripper_factory(name, idn=0):
     if name == "RobotiqThreeFingerGripper":
         return RobotiqThreeFingerGripper()
     if name == "PandaGripper":
-        return PandaGripper()
+        return PandaGripper(idn)
     if name == "JacoGripper":
         return JacoGripper()
     if name == "FetchGripper":
